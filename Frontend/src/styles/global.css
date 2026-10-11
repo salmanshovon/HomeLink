@@ -314,6 +314,42 @@ img {
   padding: var(--space-6);
 }
 
+/* ----- Ghost button variant ----- */
+.btn-ghost {
+  background: transparent;
+  color: var(--color-neutral-700);
+  border-color: transparent;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--color-neutral-100);
+  text-decoration: none;
+}
+
+/* ----- Form error state ----- */
+.input-error {
+  border-color: var(--color-danger-600) !important;
+}
+
+.input-error:focus {
+  box-shadow: 0 0 0 3px var(--color-danger-100) !important;
+}
+
+/* ----- Mobile navigation ----- */
+.mobile-menu-btn {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .desktop-nav {
+    display: none !important;
+  }
+
+  .mobile-menu-btn {
+    display: flex !important;
+  }
+}
+
 /* ----- Reduced motion ----- */
 @media (prefers-reduced-motion: reduce) {
   *,
