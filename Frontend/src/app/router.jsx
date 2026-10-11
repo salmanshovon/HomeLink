@@ -30,6 +30,10 @@ const AccessDeniedPage = lazy(() => import('../pages/errors/AccessDeniedPage.jsx
 // Layouts
 const PublicLayout = lazy(() => import('../layouts/PublicLayout.jsx'))
 const AuthLayout = lazy(() => import('../layouts/AuthLayout.jsx'))
+const TenantLayout = lazy(() => import('../layouts/TenantLayout.jsx'))
+const LandlordLayout = lazy(() => import('../layouts/LandlordLayout.jsx'))
+const EmployeeLayout = lazy(() => import('../layouts/EmployeeLayout.jsx'))
+const AdminLayout = lazy(() => import('../layouts/AdminLayout.jsx'))
 
 // Dashboard pages (lazy-loaded per role)
 const TenantDashboard = lazy(() => import('../pages/tenant/TenantDashboard.jsx'))
@@ -76,40 +80,88 @@ export function AppRouter() {
       element: (
         <ProtectedRoute>
           <RoleRoute allowedRoles={['TENANT']}>
-            <TenantDashboard />
+            <TenantLayout />
           </RoleRoute>
         </ProtectedRoute>
       ),
+      children: [
+        { index: true, element: <TenantDashboard /> },
+        { path: 'saved', element: <TenantDashboard /> },
+        { path: 'requirements', element: <TenantDashboard /> },
+        { path: 'viewings', element: <TenantDashboard /> },
+        { path: 'tenancies', element: <TenantDashboard /> },
+        { path: 'invoices', element: <TenantDashboard /> },
+        { path: 'complaints', element: <TenantDashboard /> },
+        { path: 'messages', element: <TenantDashboard /> },
+        { path: 'notifications', element: <TenantDashboard /> },
+      ],
     },
     {
       path: '/landlord',
       element: (
         <ProtectedRoute>
           <RoleRoute allowedRoles={['LANDLORD']}>
-            <LandlordDashboard />
+            <LandlordLayout />
           </RoleRoute>
         </ProtectedRoute>
       ),
+      children: [
+        { index: true, element: <LandlordDashboard /> },
+        { path: 'properties', element: <LandlordDashboard /> },
+        { path: 'listings', element: <LandlordDashboard /> },
+        { path: 'tenancies', element: <LandlordDashboard /> },
+        { path: 'invoices', element: <LandlordDashboard /> },
+        { path: 'complaints', element: <LandlordDashboard /> },
+        { path: 'messages', element: <LandlordDashboard /> },
+        { path: 'announcements', element: <LandlordDashboard /> },
+        { path: 'notifications', element: <LandlordDashboard /> },
+      ],
     },
     {
       path: '/employee',
       element: (
         <ProtectedRoute>
           <RoleRoute allowedRoles={['EMPLOYEE', 'SUPERADMIN']}>
-            <EmployeeDashboard />
+            <EmployeeLayout />
           </RoleRoute>
         </ProtectedRoute>
       ),
+      children: [
+        { index: true, element: <EmployeeDashboard /> },
+        { path: 'properties', element: <EmployeeDashboard /> },
+        { path: 'listings', element: <EmployeeDashboard /> },
+        { path: 'leads', element: <EmployeeDashboard /> },
+        { path: 'viewings', element: <EmployeeDashboard /> },
+        { path: 'applications', element: <EmployeeDashboard /> },
+        { path: 'tenancies', element: <EmployeeDashboard /> },
+        { path: 'billing', element: <EmployeeDashboard /> },
+        { path: 'messages', element: <EmployeeDashboard /> },
+        { path: 'notifications', element: <EmployeeDashboard /> },
+      ],
     },
     {
       path: '/admin',
       element: (
         <ProtectedRoute>
           <RoleRoute allowedRoles={['SUPERADMIN']}>
-            <AdminDashboard />
+            <AdminLayout />
           </RoleRoute>
         </ProtectedRoute>
       ),
+      children: [
+        { index: true, element: <AdminDashboard /> },
+        { path: 'properties', element: <AdminDashboard /> },
+        { path: 'listings', element: <AdminDashboard /> },
+        { path: 'users', element: <AdminDashboard /> },
+        { path: 'leads', element: <AdminDashboard /> },
+        { path: 'viewings', element: <AdminDashboard /> },
+        { path: 'applications', element: <AdminDashboard /> },
+        { path: 'tenancies', element: <AdminDashboard /> },
+        { path: 'billing', element: <AdminDashboard /> },
+        { path: 'commissions', element: <AdminDashboard /> },
+        { path: 'audit', element: <AdminDashboard /> },
+        { path: 'notifications', element: <AdminDashboard /> },
+      ],
     },
     { path: '/access-denied', element: <AccessDeniedPage /> },
     { path: '*', element: <NotFoundPage /> },

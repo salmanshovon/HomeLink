@@ -340,6 +340,10 @@ img {
   display: none !important;
 }
 
+.mobile-menu-toggle {
+  display: none !important;
+}
+
 @media (max-width: 768px) {
   .desktop-nav {
     display: none !important;
@@ -347,6 +351,14 @@ img {
 
   .mobile-menu-btn {
     display: flex !important;
+  }
+
+  .mobile-menu-toggle {
+    display: flex !important;
+  }
+
+  .dashboard-sidebar {
+    display: none !important;
   }
 }
 
