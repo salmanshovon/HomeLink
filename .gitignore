@@ -1,0 +1,66 @@
+# =========================================================================
+# Root .gitignore — HomeLink monorepo (Backend Django + Frontend React)
+# =========================================================================
+
+# ----- Frontend (Node / Vite) -----
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+
+# Frontend environment — never commit real secrets
+Frontend/.env
+Frontend/.env.*
+!Frontend/.env.example
+
+# Frontend test / coverage output
+Frontend/coverage/
+
+# ----- Backend (Python / Django) -----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Django specifics
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+private_media/
+
+# Backend environment — never commit real secrets
+Backend/.env
+Backend/.env.*
+!Backend/.env.example
+
+# Testing / caches
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# Editors / IDEs
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
