@@ -68,6 +68,11 @@ const EmployeeProperties = lazy(() => import('../pages/employee/EmployeeProperti
 // Admin pages
 const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard.jsx'))
 
+// Service pages
+const ServiceCategories = lazy(() => import('../pages/services/ServiceCategories.jsx'))
+const ServiceRequestForm = lazy(() => import('../pages/services/ServiceRequestForm.jsx'))
+const ServiceRequests = lazy(() => import('../pages/services/ServiceRequests.jsx'))
+
 // Route guards
 const ProtectedRoute = lazy(() => import('../routes/ProtectedRoute.jsx'))
 const RoleRoute = lazy(() => import('../routes/RoleRoute.jsx'))
@@ -189,6 +194,30 @@ export function AppRouter() {
         { path: 'audit', element: <AdminDashboard /> },
         { path: 'notifications', element: <AdminDashboard /> },
       ],
+    },
+    {
+      path: '/services',
+      element: (
+        <ProtectedRoute>
+          <ServiceCategories />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/services/requests',
+      element: (
+        <ProtectedRoute>
+          <ServiceRequests />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/services/request',
+      element: (
+        <ProtectedRoute>
+          <ServiceRequestForm />
+        </ProtectedRoute>
+      ),
     },
     { path: '/access-denied', element: <AccessDeniedPage /> },
     { path: '*', element: <NotFoundPage /> },
