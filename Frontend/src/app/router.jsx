@@ -48,6 +48,14 @@ const TenantNotifications = lazy(() => import('../pages/tenant/TenantNotificatio
 
 // Landlord pages
 const LandlordDashboard = lazy(() => import('../pages/landlord/LandlordDashboard.jsx'))
+const LandlordOverview = lazy(() => import('../pages/landlord/LandlordOverview.jsx'))
+const LandlordProperties = lazy(() => import('../pages/landlord/LandlordProperties.jsx'))
+const LandlordListings = lazy(() => import('../pages/landlord/LandlordListings.jsx'))
+const LandlordTenancies = lazy(() => import('../pages/landlord/LandlordTenancies.jsx'))
+const LandlordInvoices = lazy(() => import('../pages/landlord/LandlordInvoices.jsx'))
+const LandlordComplaints = lazy(() => import('../pages/landlord/LandlordComplaints.jsx'))
+const LandlordAnnouncements = lazy(() => import('../pages/landlord/LandlordAnnouncements.jsx'))
+const LandlordMessages = lazy(() => import('../pages/landlord/LandlordMessages.jsx'))
 
 // Employee pages
 const EmployeeDashboard = lazy(() => import('../pages/employee/EmployeeDashboard.jsx'))
@@ -120,14 +128,14 @@ export function AppRouter() {
         </ProtectedRoute>
       ),
       children: [
-        { index: true, element: <LandlordDashboard /> },
-        { path: 'properties', element: <LandlordDashboard /> },
-        { path: 'listings', element: <LandlordDashboard /> },
-        { path: 'tenancies', element: <LandlordDashboard /> },
-        { path: 'invoices', element: <LandlordDashboard /> },
-        { path: 'complaints', element: <LandlordDashboard /> },
-        { path: 'messages', element: <LandlordDashboard /> },
-        { path: 'announcements', element: <LandlordDashboard /> },
+        { index: true, element: <LandlordOverview /> },
+        { path: 'properties', element: <LandlordProperties /> },
+        { path: 'listings', element: <LandlordListings /> },
+        { path: 'tenancies', element: <LandlordTenancies /> },
+        { path: 'invoices', element: <LandlordInvoices /> },
+        { path: 'complaints', element: <LandlordComplaints /> },
+        { path: 'announcements', element: <LandlordAnnouncements /> },
+        { path: 'messages', element: <LandlordMessages /> },
         { path: 'notifications', element: <LandlordDashboard /> },
       ],
     },
