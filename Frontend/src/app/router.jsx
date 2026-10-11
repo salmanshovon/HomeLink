@@ -59,6 +59,11 @@ const LandlordMessages = lazy(() => import('../pages/landlord/LandlordMessages.j
 
 // Employee pages
 const EmployeeDashboard = lazy(() => import('../pages/employee/EmployeeDashboard.jsx'))
+const EmployeeOverview = lazy(() => import('../pages/employee/EmployeeOverview.jsx'))
+const EmployeeListings = lazy(() => import('../pages/employee/EmployeeListings.jsx'))
+const EmployeeViewings = lazy(() => import('../pages/employee/EmployeeViewings.jsx'))
+const EmployeeApplications = lazy(() => import('../pages/employee/EmployeeApplications.jsx'))
+const EmployeeProperties = lazy(() => import('../pages/employee/EmployeeProperties.jsx'))
 
 // Admin pages
 const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard.jsx'))
@@ -149,12 +154,12 @@ export function AppRouter() {
         </ProtectedRoute>
       ),
       children: [
-        { index: true, element: <EmployeeDashboard /> },
-        { path: 'properties', element: <EmployeeDashboard /> },
-        { path: 'listings', element: <EmployeeDashboard /> },
+        { index: true, element: <EmployeeOverview /> },
+        { path: 'properties', element: <EmployeeProperties /> },
+        { path: 'listings', element: <EmployeeListings /> },
         { path: 'leads', element: <EmployeeDashboard /> },
-        { path: 'viewings', element: <EmployeeDashboard /> },
-        { path: 'applications', element: <EmployeeDashboard /> },
+        { path: 'viewings', element: <EmployeeViewings /> },
+        { path: 'applications', element: <EmployeeApplications /> },
         { path: 'tenancies', element: <EmployeeDashboard /> },
         { path: 'billing', element: <EmployeeDashboard /> },
         { path: 'messages', element: <EmployeeDashboard /> },
