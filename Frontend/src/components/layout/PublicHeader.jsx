@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
+import { useAuth } from '../../contexts/AuthContext.jsx'
 
 const navLinks = [
   { to: '/search', label: 'Search' },
@@ -11,6 +12,10 @@ const navLinks = [
 
 export function PublicHeader() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { isAuthenticated, hasRole } = useAuth()
+  const isTenant = hasRole(['TENANT'])
+  const logoTo = isAuthenticated && isTenant ? '/search' : '/'
+  const showAuthButtons = !(isAuthenticated && isTenant)
 
   return (
     <header
@@ -33,7 +38,7 @@ export function PublicHeader() {
         }}
       >
         <Link
-          to="/"
+          to={logoTo}
           style={{
             fontSize: 'var(--text-xl)',
             fontWeight: 'var(--font-bold)',
@@ -82,23 +87,27 @@ export function PublicHeader() {
               {link.label}
             </Link>
           ))}
-          <Link
-            to="/auth/login"
-            style={{
-              fontWeight: 'var(--font-semibold)',
-              color: 'var(--color-brand-700)',
-              fontSize: 'var(--text-sm)',
-            }}
-          >
-            Sign In
-          </Link>
-          <Link
-            to="/auth/register/tenant"
-            className="btn btn-primary btn-sm"
-            style={{ textDecoration: 'none' }}
-          >
-            Get Started
-          </Link>
+          {showAuthButtons && (
+            <>
+              <Link
+                to="/auth/login"
+                style={{
+                  fontWeight: 'var(--font-semibold)',
+                  color: 'var(--color-brand-700)',
+                  fontSize: 'var(--text-sm)',
+                }}
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/auth/register/tenant"
+                className="btn btn-primary btn-sm"
+                style={{ textDecoration: 'none' }}
+              >
+                Get Started
+              </Link>
+            </>
+          )}
         </nav>
 
         {/* Mobile hamburger */}
@@ -154,27 +163,31 @@ export function PublicHeader() {
               {link.label}
             </Link>
           ))}
-          <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: 'var(--space-2) 0' }} />
-          <Link
-            to="/auth/login"
-            onClick={() => setMobileOpen(false)}
-            style={{
-              padding: 'var(--space-3)',
-              fontWeight: 'var(--font-semibold)',
-              color: 'var(--color-brand-700)',
-              textDecoration: 'none',
-            }}
-          >
-            Sign In
-          </Link>
-          <Link
-            to="/auth/register/tenant"
-            onClick={() => setMobileOpen(false)}
-            className="btn btn-primary"
-            style={{ textDecoration: 'none', textAlign: 'center' }}
-          >
-            Get Started
-          </Link>
+          {showAuthButtons && (
+            <>
+              <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: 'var(--space-2) 0' }} />
+              <Link
+                to="/auth/login"
+                onClick={() => setMobileOpen(false)}
+                style={{
+                  padding: 'var(--space-3)',
+                  fontWeight: 'var(--font-semibold)',
+                  color: 'var(--color-brand-700)',
+                  textDecoration: 'none',
+                }}
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/auth/register/tenant"
+                onClick={() => setMobileOpen(false)}
+                className="btn btn-primary"
+                style={{ textDecoration: 'none', textAlign: 'center' }}
+              >
+                Get Started
+              </Link>
+            </>
+          )}
         </nav>
       )}
     </header>

@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api/v1'
 
 export class ApiError extends Error {
   constructor(status, code, message, details = null) {
@@ -40,10 +40,28 @@ function parseError(error) {
       const { code, message, details } = data.error
       return new ApiError(status, code || 'error', message, details)
     }
-    if (typeof data === 'string') {
+    if (typeof data === 'string' && data.trim()) {
       return new ApiError(status, 'error', data)
     }
-    return new ApiError(status, 'error', `Request failed with status ${status}`, data)
+    if (data && typeof data === 'object' && !data.error) {
+      return new ApiError(status, 'error', 'Request failed.', data)
+    }
+    // Handle empty error responses (e.g., SimpleJWT 401 with no body)
+    const fallbackMessages = {
+      400: 'Invalid request. Please check your input.',
+      401: 'Invalid credentials or session expired.',
+      403: 'You do not have permission to perform this action.',
+      404: 'The requested resource was not found.',
+      405: 'Method not allowed.',
+      422: 'Validation failed. Please check your input.',
+      429: 'Too many requests. Please try again later.',
+      500: 'Server error. Please try again later.',
+    }
+    return new ApiError(
+      status,
+      'error',
+      fallbackMessages[status] || `Request failed with status ${status}.`,
+    )
   }
   if (error.request) {
     return new ApiError(0, 'network_error', 'Network error. Please check your connection.')
@@ -138,4 +156,17 @@ export function getRefreshToken() {
 
 export function clearRefreshToken() {
   localStorage.removeItem('homelink_refresh_token')
+}
+
+// Initialize access token from localStorage on module load
+const savedToken = typeof localStorage !== 'undefined' ? localStorage.getItem('homelink_access_token') : null
+if (savedToken) {
+  window.__homelink_access_token = savedToken
+}
+
+export function initAccessToken() {
+  const token = localStorage.getItem('homelink_access_token')
+  if (token) {
+    window.__homelink_access_token = token
+  }
 }

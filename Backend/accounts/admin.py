@@ -20,12 +20,26 @@ class UserAdmin(BaseUserAdmin):
     list_display = ('phone_number', 'email', 'account_status', 'is_phone_verified', 'is_active')
     list_filter = ('account_status', 'is_phone_verified', 'is_active')
     search_fields = ('phone_number', 'email', 'first_name', 'last_name')
-    fieldsets = BaseUserAdmin.fieldsets + (
-        ('HomeLink', {'fields': ('phone_number', 'is_phone_verified', 'is_email_verified', 'account_status')}),
+    fieldsets = (
+        (None, {'fields': ('phone_number', 'password')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login',)}),
+        ('HomeLink', {'fields': ('is_phone_verified', 'is_email_verified', 'account_status')}),
     )
-    add_fieldsets = BaseUserAdmin.add_fieldsets + (
-        (None, {'fields': ('phone_number', 'email')}),
+    readonly_fields = ('created_at', 'updated_at')
+    add_fieldsets = (
+        (None, {'classes': ('wide',), 'fields': ('phone_number', 'email', 'password1', 'password2')}),
     )
+
+    def get_form(self, request, obj=None, **kwargs):
+        # BaseUserAdmin.get_form injects 'username' into exclude, which
+        # does not exist on our custom User model (username = None).
+        # Strip it before building the form.
+        form = super().get_form(request, obj, **kwargs)
+        if 'username' in form.base_fields:
+            del form.base_fields['username']
+        return form
 
 
 @admin.register(UserRole)

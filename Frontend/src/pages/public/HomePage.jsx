@@ -1,12 +1,20 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { Search, MapPin, Home, Shield, Wrench, ArrowRight } from 'lucide-react'
+import { useAuth } from '../../contexts/AuthContext.jsx'
 
 export default function HomePage() {
   const navigate = useNavigate()
+  const { isAuthenticated, hasRole, isLoading } = useAuth()
   const [searchArea, setSearchArea] = useState('')
   const [searchRent, setSearchRent] = useState('')
   const [searchBedrooms, setSearchBedrooms] = useState('')
+
+  const isTenant = hasRole(['TENANT'])
+
+  if (!isLoading && isAuthenticated && isTenant) {
+    return <Navigate to="/search" replace />
+  }
 
   const handleSearch = (e) => {
     e.preventDefault()

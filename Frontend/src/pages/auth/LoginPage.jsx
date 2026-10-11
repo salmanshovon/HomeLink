@@ -98,9 +98,9 @@ export default function LoginPage() {
 }
 
 function getDefaultRoute(user) {
-  const roles = user?.roles || []
+  const roles = (user?.roles || []).map((r) => r.toUpperCase())
   if (roles.includes('SUPERADMIN')) return '/admin'
-  if (roles.includes('EMPLOYEE') || roles.includes('SUPERADMIN')) return '/employee'
+  if (roles.includes('EMPLOYEE')) return '/employee'
   if (roles.includes('LANDLORD')) return '/landlord'
   if (roles.includes('TENANT')) return '/tenant'
   return '/'

@@ -4,8 +4,9 @@ export async function login(phoneNumber, password) {
   const response = await apiClient.post('/auth/login/', {
     phone_number: phoneNumber,
     password,
-  })
+  }, { _skipAuth: true })
   const { access, refresh, user } = response.data
+  localStorage.setItem('homelink_access_token', access)
   setAccessToken(access)
   setRefreshToken(refresh)
   return { user }

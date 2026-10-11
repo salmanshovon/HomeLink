@@ -58,8 +58,8 @@ export function AuthProvider({ children }) {
     (roles) => {
       if (!user) return false
       if (!roles || roles.length === 0) return true
-      const userRoles = user.roles || []
-      return roles.some((role) => userRoles.includes(role))
+      const userRoles = (user.roles || []).map((r) => r.toUpperCase())
+      return roles.some((role) => userRoles.includes(role.toUpperCase()))
     },
     [user],
   )

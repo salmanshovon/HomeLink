@@ -2,8 +2,8 @@
 
 Full-stack property rental brokerage and management platform (Bangladesh).
 
-- **Backend:** Django 6.1 + Django REST Framework (this repository's `Backend/`)
-- **Frontend:** React 19 + Vite (`Frontend/`)
+- **Backend:** Django 6.1 + Django REST Framework (`Backend/`)
+- **Frontend:** React 19 + Vite + TanStack Query (`Frontend/`)
 - **API prefix:** `/api/v1/`
 - **Docs:** `/api/docs/` (Swagger UI), `/api/redoc/`, `/api/schema/`
 
@@ -38,6 +38,51 @@ Backend/
 ├── manage.py
 └── .env / .env.example
 ```
+
+## Frontend structure
+
+```
+Frontend/src/
+├── app/                    # App entry, router, providers
+├── api/                    # Axios client + API modules (auth, properties, tenants, landlords, employees, services)
+├── components/
+│   ├── common/             # Button, Input, Select, Textarea, Card, Badge, Modal, ConfirmDialog,
+│   │                       #   EmptyState, ErrorState, LoadingSpinner, Skeleton
+│   ├── layout/             # PublicHeader, PublicFooter, DashboardHeader, DashboardSidebar, DashboardLayout
+│   ├── property/           # PropertyCard
+│   └── feedback/           # AppErrorBoundary, FullPageSpinner
+├── contexts/               # AuthContext (session, login, logout, role checks)
+├── hooks/                  # useLogout (clears query cache)
+├── layouts/                # PublicLayout, AuthLayout, TenantLayout, LandlordLayout, EmployeeLayout, AdminLayout
+├── pages/
+│   ├── public/             # Home, Search, PropertyDetails, HowItWorks, MaintenanceServices,
+│   │                       #   About, Contact, PrivacyPolicy, Terms
+│   ├── auth/               # Login, RegisterTenant, RegisterLandlord, VerifyPhone, PasswordReset
+│   ├── tenant/             # Overview, SavedProperties, RentalRequirements, Viewings, Invoices,
+│   │                       #   Complaints, Messages, Notifications
+│   ├── landlord/           # Overview, Properties, Listings, Tenancies, Invoices, Complaints,
+│   │                       #   Announcements, Messages
+│   ├── employee/           # Overview, Properties, Listings (moderation), Viewings, Applications
+│   ├── admin/              # Admin dashboard
+│   ├── services/           # ServiceCategories, ServiceRequestForm, ServiceRequests
+│   └── errors/             # NotFound, AccessDenied
+├── routes/                 # ProtectedRoute, RoleRoute
+├── styles/                 # tokens.css (design tokens), global.css
+├── test/                   # Vitest + React Testing Library tests
+└── utils/                  # currency (BDT), date, validation (Zod schemas)
+```
+
+### Frontend tech stack
+
+- **React 19** with JavaScript (JSX) — no TypeScript
+- **Vite 8** — build tool and dev server
+- **React Router 7** — client-side routing with lazy-loaded routes
+- **TanStack Query 5** — server-state fetching, caching, invalidation
+- **React Hook Form 7** + **Zod** — form handling and validation
+- **Axios** — HTTP client with JWT interceptors and token refresh
+- **Lucide React** — icon library
+- **Vitest 5** + **React Testing Library** — testing
+- **Custom CSS design system** — no external UI framework
 
 ## Prerequisites
 
@@ -96,7 +141,7 @@ python manage.py seed_base_data
 
 Seeds common amenities and the maintenance service categories. **Never run in production.**
 
-### 8. Run the development server
+### 8. Run the backend server
 
 ```powershell
 python manage.py runserver
@@ -104,7 +149,7 @@ python manage.py runserver
 
 The API is served at `http://127.0.0.1:8000/api/v1/`.
 
-### 9. Run tests
+### 9. Run backend tests
 
 ```powershell
 python manage.py test
@@ -116,9 +161,53 @@ python manage.py test
 - ReDoc: `http://127.0.0.1:8000/api/redoc/`
 - Raw schema: `http://127.0.0.1:8000/api/schema/`
 
+## Frontend setup
+
+```powershell
+cd Frontend
+npm install
+```
+
+### Environment variables
+
+Copy `.env.example` to `.env`:
+
+```env
+# Leave empty in development to use the Vite proxy
+VITE_API_BASE_URL=
+```
+
+### Run the frontend dev server
+
+```powershell
+npm run dev
+```
+
+The app runs at `http://localhost:5173/`. Requests to `/api/...` are proxied to the Django
+server (see `Frontend/vite.config.js`). Set `VITE_API_BASE_URL` in `Frontend/.env` to point
+at a deployed API.
+
+### Frontend scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start the Vite dev server (port 5173) |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview the production build |
+| `npm run lint` | Run Oxlint |
+| `npm run lint:fix` | Run Oxlint with auto-fix |
+| `npm run test` | Run tests once |
+| npm run test:watch` | Run tests in watch mode |
+| `npm run test:coverage` | Run tests with coverage |
+
+### Frontend tests
+
+Tests cover app routing, component rendering, validation schemas, search filters,
+currency/date formatting, and API error handling. Located in `Frontend/src/test/`.
+
 ## Environment variables
 
-Defined in `Backend/.env` (see `.env.example`).
+### Backend (`.env`)
 
 | Variable | Description | Default |
 |---|---|---|
@@ -131,6 +220,16 @@ Defined in `Backend/.env` (see `.env.example`).
 | `AWS_*` | S3 credentials/bucket (when `DJANGO_USE_S3=True`) | — |
 | `EMAIL_HOST` / `EMAIL_PORT` / `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` | SMTP (production) | — |
 | `OTP_PROVIDER` | `console` (dev) or an SMS gateway (prod) | `console` |
+
+### Frontend (`.env`)
+
+| Variable | Description | Default |
+|---|---|---|
+| `VITE_API_BASE_URL` | Django API base URL (empty = use Vite proxy) | (empty) |
+| `VITE_PUBLIC_SITE_URL` | Public site URL for canonical links | `https://homelink.com.bd` |
+| `VITE_ENABLE_QUERY_DEVTOOLS` | React Query devtools in development | `true` |
+
+**Note:** Vite variables prefixed with `VITE_` are public in the built application. Never put secrets in them.
 
 ## Authentication
 
@@ -169,17 +268,21 @@ Defined in `Backend/.env` (see `.env.example`).
 - **Services:** `/api/v1/categories/`, `/api/v1/requests/`
 - **Audit:** `/api/v1/audit-logs/`
 
-## Frontend (React + Vite)
+## Frontend architecture notes
 
-```powershell
-cd Frontend
-npm install
-npm run dev
-```
-
-The app runs at `http://localhost:5173/`. Requests to `/api/...` are proxied to the Django
-server (see `Frontend/vite.config.js`). Set `VITE_API_BASE_URL` in `Frontend/.env` to point
-at a deployed API.
+- **State management:** React Context for auth state; TanStack Query for server state. No Redux.
+- **Route guards:** `ProtectedRoute` (auth) + `RoleRoute` (role-based access). Frontend guards
+  are UX-only; the Django API enforces all permissions server-side.
+- **Token handling:** Access token in memory (attached via Axios interceptor); refresh token
+  in localStorage for session restoration. Automatic refresh on 401 with single-flight guard.
+- **Error handling:** Standardized envelope `{ error: { code, message, details } }` parsed
+  into `ApiError` class with field-level validation errors.
+- **Pagination:** All list endpoints use `{ count, next, previous, results }` format.
+- **Money:** All monetary values formatted as BDT via `Intl.NumberFormat`.
+- **Styling:** Custom CSS design system with design tokens (colors, spacing, typography,
+  shadows, breakpoints). No external CSS framework.
+- **Accessibility:** Skip links, ARIA labels, focus-visible outlines, semantic HTML,
+  `prefers-reduced-motion` support.
 
 ## Notes
 
