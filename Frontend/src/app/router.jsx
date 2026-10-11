@@ -35,10 +35,24 @@ const LandlordLayout = lazy(() => import('../layouts/LandlordLayout.jsx'))
 const EmployeeLayout = lazy(() => import('../layouts/EmployeeLayout.jsx'))
 const AdminLayout = lazy(() => import('../layouts/AdminLayout.jsx'))
 
-// Dashboard pages (lazy-loaded per role)
+// Tenant pages
 const TenantDashboard = lazy(() => import('../pages/tenant/TenantDashboard.jsx'))
+const TenantOverview = lazy(() => import('../pages/tenant/TenantOverview.jsx'))
+const TenantSavedProperties = lazy(() => import('../pages/tenant/TenantSavedProperties.jsx'))
+const TenantRentalRequirements = lazy(() => import('../pages/tenant/TenantRentalRequirements.jsx'))
+const TenantViewings = lazy(() => import('../pages/tenant/TenantViewings.jsx'))
+const TenantInvoices = lazy(() => import('../pages/tenant/TenantInvoices.jsx'))
+const TenantComplaints = lazy(() => import('../pages/tenant/TenantComplaints.jsx'))
+const TenantMessages = lazy(() => import('../pages/tenant/TenantMessages.jsx'))
+const TenantNotifications = lazy(() => import('../pages/tenant/TenantNotifications.jsx'))
+
+// Landlord pages
 const LandlordDashboard = lazy(() => import('../pages/landlord/LandlordDashboard.jsx'))
+
+// Employee pages
 const EmployeeDashboard = lazy(() => import('../pages/employee/EmployeeDashboard.jsx'))
+
+// Admin pages
 const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard.jsx'))
 
 // Route guards
@@ -85,15 +99,15 @@ export function AppRouter() {
         </ProtectedRoute>
       ),
       children: [
-        { index: true, element: <TenantDashboard /> },
-        { path: 'saved', element: <TenantDashboard /> },
-        { path: 'requirements', element: <TenantDashboard /> },
-        { path: 'viewings', element: <TenantDashboard /> },
-        { path: 'tenancies', element: <TenantDashboard /> },
-        { path: 'invoices', element: <TenantDashboard /> },
-        { path: 'complaints', element: <TenantDashboard /> },
-        { path: 'messages', element: <TenantDashboard /> },
-        { path: 'notifications', element: <TenantDashboard /> },
+        { index: true, element: <TenantOverview /> },
+        { path: 'saved', element: <TenantSavedProperties /> },
+        { path: 'requirements', element: <TenantRentalRequirements /> },
+        { path: 'viewings', element: <TenantViewings /> },
+        { path: 'tenancies', element: <TenantInvoices /> },
+        { path: 'invoices', element: <TenantInvoices /> },
+        { path: 'complaints', element: <TenantComplaints /> },
+        { path: 'messages', element: <TenantMessages /> },
+        { path: 'notifications', element: <TenantNotifications /> },
       ],
     },
     {
