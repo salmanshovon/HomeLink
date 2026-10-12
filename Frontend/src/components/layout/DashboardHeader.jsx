@@ -1,13 +1,19 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Menu, X, LogOut, User } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Menu, X, LogOut, User, Search } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext.jsx'
 import { useLogout } from '../../hooks/useLogout.js'
 
 export function DashboardHeader({ onMenuToggle, menuOpen }) {
   const { user } = useAuth()
   const logout = useLogout()
+  const navigate = useNavigate()
   const [dropdownOpen, setDropdownOpen] = useState(false)
+
+  const profilePath = user?.roles?.includes('superadmin') ? '/admin/profile'
+    : user?.roles?.includes('employee') ? '/employee/profile'
+    : user?.roles?.includes('landlord') ? '/landlord/profile'
+    : '/tenant/profile'
 
   return (
     <header
@@ -53,9 +59,18 @@ export function DashboardHeader({ onMenuToggle, menuOpen }) {
         </Link>
       </div>
 
-      <div style={{ position: 'relative' }}>
-        <button
-          onClick={() => setDropdownOpen(!dropdownOpen)}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+        <Link
+          to="/search"
+          className="btn btn-secondary btn-sm"
+          style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)' }}
+        >
+          <Search size={16} />
+          Search
+        </Link>
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setDropdownOpen(!dropdownOpen)}
           aria-expanded={dropdownOpen}
           aria-label="User menu"
           style={{
@@ -92,6 +107,26 @@ export function DashboardHeader({ onMenuToggle, menuOpen }) {
             }}
           >
             <button
+              onClick={() => { setDropdownOpen(false); navigate(profilePath) }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--space-2)',
+                width: '100%',
+                padding: 'var(--space-3) var(--space-4)',
+                background: 'none',
+                border: 'none',
+                borderRadius: 'var(--radius-md)',
+                cursor: 'pointer',
+                fontSize: 'var(--text-sm)',
+                color: 'var(--color-neutral-700)',
+                textAlign: 'left',
+              }}
+            >
+              <User size={16} />
+              My Profile
+            </button>
+            <button
               onClick={() => {
                 setDropdownOpen(false)
                 logout()
@@ -116,6 +151,7 @@ export function DashboardHeader({ onMenuToggle, menuOpen }) {
             </button>
           </div>
         )}
+        </div>
       </div>
     </header>
   )

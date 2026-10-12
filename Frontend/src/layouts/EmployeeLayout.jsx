@@ -1,5 +1,5 @@
 import { DashboardLayout } from '../components/layout/DashboardLayout.jsx'
-import { Home, Building, FileText, Users, ClipboardList, Calendar, CreditCard, MessageSquare, Bell } from 'lucide-react'
+import { Home, Building, FileText, Users, ClipboardList, Calendar, CreditCard, MessageSquare, Bell, User } from 'lucide-react'
 
 const employeeNav = [
   { to: '/employee', label: 'Overview', icon: <Home size={18} /> },
@@ -12,6 +12,7 @@ const employeeNav = [
   { to: '/employee/billing', label: 'Billing', icon: <CreditCard size={18} /> },
   { to: '/employee/messages', label: 'Messages', icon: <MessageSquare size={18} /> },
   { to: '/employee/notifications', label: 'Notifications', icon: <Bell size={18} /> },
+  { to: '/employee/profile', label: 'My Profile', icon: <User size={18} /> },
 ]
 
 export default function EmployeeLayout() {

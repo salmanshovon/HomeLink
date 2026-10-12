@@ -264,3 +264,103 @@ class MeView(generics.RetrieveUpdateAPIView):
         except (LandlordProfile.DoesNotExist, TenantProfile.DoesNotExist):
             profile = None
         return Response({'user': UserSerializer(user).data, 'profile': profile})
+
+    def update(self, request, *args, **kwargs):
+        user = request.user
+        partial = kwargs.pop('partial', False)
+
+        # Update user fields
+        user_serializer = UserSerializer(user, data=request.data, partial=True)
+        user_serializer.is_valid(raise_exception=True)
+
+        allowed_user_fields = {'first_name', 'last_name', 'email'}
+        for field in allowed_user_fields:
+            if field in user_serializer.validated_data:
+                setattr(user, field, user_serializer.validated_data[field])
+        user.save(update_fields=['first_name', 'last_name', 'email', 'updated_at'])
+
+        # Update profile if applicable
+        profile_data = {k: v for k, v in request.data.items() if k not in allowed_user_fields}
+        profile_serializer = self.get_serializer_class()
+
+        if hasattr(user, 'landlord_profile') and profile_data:
+            serializer = LandlordProfileSerializer(user.landlord_profile, data=profile_data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        elif hasattr(user, 'tenant_profile') and profile_data:
+            serializer = TenantProfileSerializer(user.tenant_profile, data=profile_data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+        # Re-fetch to get updated data
+        user.refresh_from_db()
+        profile = None
+        if hasattr(user, 'landlord_profile'):
+            profile = LandlordProfileSerializer(user.landlord_profile).data
+        elif hasattr(user, 'tenant_profile'):
+            profile = TenantProfileSerializer(user.tenant_profile).data
+
+        return Response({'user': UserSerializer(user).data, 'profile': profile})
+
+
+class ChangePasswordView(APIView):
+    """Allow authenticated users to change their own password."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        old_password = request.data.get('old_password')
+        new_password = request.data.get('new_password')
+
+        if not old_password or not new_password:
+            return Response(
+                {'error': {'code': 'missing_fields', 'message': 'Both old_password and new_password are required.'}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not user.check_password(old_password):
+            return Response(
+                {'error': {'code': 'invalid_password', 'message': 'Current password is incorrect.'}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        from django.contrib.auth.password_validation import validate_password
+        from django.core.exceptions import ValidationError
+        try:
+            validate_password(new_password, user)
+        except ValidationError as exc:
+            return Response(
+                {'error': {'code': 'invalid_password', 'message': ' '.join(exc.messages)}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.set_password(new_password)
+        user.save(update_fields=['password', 'updated_at'])
+        return Response({'detail': 'Password changed successfully.'}, status=status.HTTP_200_OK)
+
+
+class AddressListView(generics.ListCreateAPIView):
+    """List or create addresses for the authenticated user."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        from .serializers import UserAddressSerializer
+        return UserAddressSerializer
+
+    def get_queryset(self):
+        return self.request.user.addresses.all()
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class AddressDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """Retrieve, update, or delete an address belonging to the authenticated user."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        from .serializers import UserAddressSerializer
+        return UserAddressSerializer
+
+    def get_queryset(self):
+        return self.request.user.addresses.all()

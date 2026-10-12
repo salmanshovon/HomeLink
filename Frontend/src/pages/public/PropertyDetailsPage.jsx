@@ -1,27 +1,40 @@
-import { useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getPropertyDetails, getPropertyMedia, createInquiry, toggleSaveProperty } from '../../api/properties.api.js'
 import { useAuth } from '../../contexts/AuthContext.jsx'
 import { formatBDT } from '../../utils/currency.js'
 import { formatDate } from '../../utils/date.js'
+import { formatLocation } from '../../utils/location.js'
 import { Badge } from '../../components/common/Badge.jsx'
 import { Button } from '../../components/common/Button.jsx'
 import { LoadingSpinner } from '../../components/common/LoadingSpinner.jsx'
 import { ErrorState } from '../../components/common/ErrorState.jsx'
 import { EmptyState } from '../../components/common/EmptyState.jsx'
 
+// Set when a guest clicks "Save" so the property can be saved automatically
+// once they sign in. sessionStorage so it survives the login round-trip.
+const PENDING_SAVE_KEY = 'homelink:pending-save'
+
 export default function PropertyDetailsPage() {
   const { id } = useParams()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
+  const navigate = useNavigate()
   const [activeImage, setActiveImage] = useState(0)
   const [inquiryForm, setInquiryForm] = useState({ guest_name: '', guest_phone: '', message: '' })
   const [inquirySent, setInquirySent] = useState(false)
   const [saveError, setSaveError] = useState('')
+  const [saved, setSaved] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  // Only auto-save once per mount.
+  const autoSaveDone = useRef(false)
+
+  const isStaff = user && (user.roles?.some(r => ['SUPERADMIN', 'EMPLOYEE'].includes(r.toUpperCase())))
 
   const { data: property, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['property', id],
     queryFn: () => getPropertyDetails(id),
+    retry: 1,
   })
 
   const { data: media } = useQuery({
@@ -32,6 +45,21 @@ export default function PropertyDetailsPage() {
 
   const listing = property?.listings?.[0]
   const images = media?.length > 0 ? media : (listing?.cover_image ? [{ file: listing.cover_image, media_type: 'image' }] : [])
+
+  // After the guest signs in and lands back here, finish what they started.
+  useEffect(() => {
+    if (!isAuthenticated || !id || autoSaveDone.current) return
+    const pending = sessionStorage.getItem(PENDING_SAVE_KEY)
+    if (pending !== id) return
+
+    autoSaveDone.current = true
+    sessionStorage.removeItem(PENDING_SAVE_KEY)
+    setIsSaving(true)
+    toggleSaveProperty(id)
+      .then(() => { setSaved(true); refetch() })
+      .catch((err) => setSaveError(err.message || 'Could not save this property.'))
+      .finally(() => setIsSaving(false))
+  }, [isAuthenticated, id, refetch])
 
   const handleInquirySubmit = async (e) => {
     e.preventDefault()
@@ -48,11 +76,24 @@ export default function PropertyDetailsPage() {
 
   const handleSave = async () => {
     setSaveError('')
+
+    // Guests are sent to sign in; the pending-save flag completes the action
+    // once they return authenticated.
+    if (!isAuthenticated) {
+      sessionStorage.setItem(PENDING_SAVE_KEY, id)
+      navigate('/auth/login', { state: { from: `/properties/${id}` }, replace: true })
+      return
+    }
+
+    setIsSaving(true)
     try {
       await toggleSaveProperty(id)
+      setSaved(true)
       refetch()
     } catch (err) {
       setSaveError(err.message || 'Failed to save property')
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -104,7 +145,7 @@ export default function PropertyDetailsPage() {
           <div className="card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-6)' }}>
             <h3 style={{ marginBottom: 'var(--space-4)' }}>Location</h3>
             <p style={{ margin: 0, color: 'var(--color-neutral-600)' }}>
-              {property.public_location || [property.area, property.city, property.district].filter(Boolean).join(', ')}
+              {formatLocation(property)}
             </p>
             {property.landmark && (
               <p style={{ margin: 'var(--space-2) 0 0', fontSize: 'var(--text-sm)', color: 'var(--color-neutral-500)' }}>
@@ -112,6 +153,37 @@ export default function PropertyDetailsPage() {
               </p>
             )}
           </div>
+
+          {/* Private details - staff only */}
+          {isStaff && (
+            <div className="card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-6)', border: '1px solid var(--color-brand-200)' }}>
+              <h3 style={{ marginBottom: 'var(--space-4)', color: 'var(--color-brand-700)' }}>Staff Only — Full Details</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-4)' }}>
+                {property.full_private_address && <div><strong>Full Address:</strong> {property.full_private_address}</div>}
+                {property.house_number && <div><strong>House:</strong> {property.house_number}</div>}
+                {property.building_name && <div><strong>Building:</strong> {property.building_name}</div>}
+                {property.road_number && <div><strong>Road:</strong> {property.road_number}</div>}
+                {property.society_name && <div><strong>Society:</strong> {property.society_name}</div>}
+                {property.division && <div><strong>Division:</strong> {property.division}</div>}
+                {property.postal_code && <div><strong>Postal Code:</strong> {property.postal_code}</div>}
+                {property.landlord_name && <div><strong>Landlord:</strong> {property.landlord_name}</div>}
+              </div>
+              {property.contacts?.length > 0 && (
+                <div style={{ marginTop: 'var(--space-4)' }}>
+                  <h4 style={{ marginBottom: 'var(--space-3)' }}>Owner Contacts</h4>
+                  {property.contacts.map((contact) => (
+                    <div key={contact.id} style={{ marginBottom: 'var(--space-3)', padding: 'var(--space-3)', background: 'var(--color-neutral-50)', borderRadius: 'var(--radius-md)' }}>
+                      <div><strong>{contact.contact_name}</strong> ({contact.contact_type})</div>
+                      <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-neutral-600)' }}>
+                        Phone: {contact.primary_phone}
+                        {contact.alternate_phone && ` | Alt: ${contact.alternate_phone}`}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Features */}
           {listing && (
@@ -200,8 +272,14 @@ export default function PropertyDetailsPage() {
                 )}
               </div>
 
-              <Button onClick={handleSave} variant="outline" className="btn-full" style={{ marginBottom: 'var(--space-3)' }}>
-                Save Property
+              <Button
+                onClick={handleSave}
+                variant={saved ? 'primary' : 'outline'}
+                className="btn-full"
+                disabled={isSaving || saved}
+                style={{ marginBottom: 'var(--space-3)' }}
+              >
+                {isSaving ? 'Saving…' : saved ? 'Saved' : isAuthenticated ? 'Save Property' : 'Sign in to save'}
               </Button>
               {saveError && <p style={{ color: 'var(--color-danger-600)', fontSize: 'var(--text-sm)', margin: 'var(--space-2) 0 0' }}>{saveError}</p>}
 

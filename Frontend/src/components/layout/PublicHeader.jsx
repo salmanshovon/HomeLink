@@ -12,10 +12,14 @@ const navLinks = [
 
 export function PublicHeader() {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const { isAuthenticated, hasRole } = useAuth()
-  const isTenant = hasRole(['TENANT'])
-  const logoTo = isAuthenticated && isTenant ? '/search' : '/'
-  const showAuthButtons = !(isAuthenticated && isTenant)
+  const { isAuthenticated, user } = useAuth()
+  const roles = (user?.roles || []).map((r) => r.toUpperCase())
+  const dashboardRoute = roles.includes('SUPERADMIN') ? '/admin'
+    : roles.includes('EMPLOYEE') ? '/employee'
+    : roles.includes('LANDLORD') ? '/landlord'
+    : '/tenant'
+  const logoTo = isAuthenticated ? dashboardRoute : '/'
+  const showAuthButtons = !isAuthenticated
 
   return (
     <header
@@ -87,7 +91,15 @@ export function PublicHeader() {
               {link.label}
             </Link>
           ))}
-          {showAuthButtons && (
+          {isAuthenticated ? (
+            <Link
+              to={dashboardRoute}
+              className="btn btn-secondary btn-sm"
+              style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)' }}
+            >
+              Dashboard
+            </Link>
+          ) : (
             <>
               <Link
                 to="/auth/login"
@@ -163,7 +175,16 @@ export function PublicHeader() {
               {link.label}
             </Link>
           ))}
-          {showAuthButtons && (
+          {isAuthenticated ? (
+            <Link
+              to={dashboardRoute}
+              onClick={() => setMobileOpen(false)}
+              className="btn btn-secondary"
+              style={{ textDecoration: 'none', textAlign: 'center' }}
+            >
+              Dashboard
+            </Link>
+          ) : (
             <>
               <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: 'var(--space-2) 0' }} />
               <Link

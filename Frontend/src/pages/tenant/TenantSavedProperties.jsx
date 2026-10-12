@@ -27,12 +27,17 @@ export default function TenantSavedProperties() {
     return <EmptyState icon="🔖" title="No saved properties" description="Properties you save will appear here for quick access." />
   }
 
+  // Each result is { id, listing, created_at }, where `listing` is a
+  // PublicListingSerializer. PropertyCard handles that flat shape, so pass it
+  // straight through instead of a non-existent nested `property` object.
+  const cards = results.map((item) => item.listing).filter(Boolean)
+
   return (
     <div>
       <h1 style={{ marginBottom: 'var(--space-8)' }}>Saved Properties</h1>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--space-6)' }}>
-        {results.map((item) => (
-          <PropertyCard key={item.id} property={item.listing?.property || item} />
+        {cards.map((listing) => (
+          <PropertyCard key={listing.id} property={listing} />
         ))}
       </div>
     </div>

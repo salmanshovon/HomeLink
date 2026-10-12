@@ -1,5 +1,5 @@
 import { DashboardLayout } from '../components/layout/DashboardLayout.jsx'
-import { Home, Building, FileText, Users, CreditCard, MessageSquare, Bell, Megaphone } from 'lucide-react'
+import { Home, Building, FileText, Users, CreditCard, MessageSquare, Bell, Megaphone, User } from 'lucide-react'
 
 const landlordNav = [
   { to: '/landlord', label: 'Overview', icon: <Home size={18} /> },
@@ -11,6 +11,7 @@ const landlordNav = [
   { to: '/landlord/messages', label: 'Messages', icon: <MessageSquare size={18} /> },
   { to: '/landlord/announcements', label: 'Announcements', icon: <Megaphone size={18} /> },
   { to: '/landlord/notifications', label: 'Notifications', icon: <Bell size={18} /> },
+  { to: '/landlord/profile', label: 'My Profile', icon: <User size={18} /> },
 ]
 
 export default function LandlordLayout() {

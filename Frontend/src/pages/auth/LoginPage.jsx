@@ -3,6 +3,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '../../contexts/AuthContext.jsx'
+
+function getDashboardRoute(user) {
+  const roles = (user?.roles || []).map((r) => r.toUpperCase())
+  if (roles.includes('SUPERADMIN')) return '/admin'
+  if (roles.includes('EMPLOYEE')) return '/employee'
+  if (roles.includes('LANDLORD')) return '/landlord'
+  return '/tenant'
+}
 import { ApiError } from '../../api/client.js'
 import { loginSchema } from '../../utils/validation.js'
 import { Button } from '../../components/common/Button.jsx'
@@ -25,8 +33,8 @@ export default function LoginPage() {
   const onSubmit = async (data) => {
     setServerError('')
     try {
-      const user = await login(data.phone_number, data.password)
-      const from = location.state?.from || getDefaultRoute(user)
+      const userData = await login(data.phone_number, data.password)
+      const from = location.state?.from || getDashboardRoute(userData)
       navigate(from, { replace: true })
     } catch (error) {
       if (error instanceof ApiError) {
@@ -97,11 +105,4 @@ export default function LoginPage() {
   )
 }
 
-function getDefaultRoute(user) {
-  const roles = (user?.roles || []).map((r) => r.toUpperCase())
-  if (roles.includes('SUPERADMIN')) return '/admin'
-  if (roles.includes('EMPLOYEE')) return '/employee'
-  if (roles.includes('LANDLORD')) return '/landlord'
-  if (roles.includes('TENANT')) return '/tenant'
-  return '/'
-}
+

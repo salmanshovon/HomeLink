@@ -3,6 +3,9 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { AppProviders } from './providers.jsx'
 import { AppErrorBoundary } from '../components/feedback/AppErrorBoundary.jsx'
 import { FullPageSpinner } from '../components/feedback/FullPageSpinner.jsx'
+// Imported eagerly: SessionRedirect wraps every route as a layout element, so
+// it must be resolved before React Router renders the route tree.
+import { SessionRedirect } from '../routes/SessionRedirect.jsx'
 
 // Public pages
 const HomePage = lazy(() => import('../pages/public/HomePage.jsx'))
@@ -67,6 +70,12 @@ const EmployeeProperties = lazy(() => import('../pages/employee/EmployeeProperti
 
 // Admin pages
 const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard.jsx'))
+const AdminUserListPage = lazy(() => import('../pages/admin/AdminUserListPage.jsx'))
+const AdminUserDetailPage = lazy(() => import('../pages/admin/AdminUserDetailPage.jsx'))
+const AdminCreateEmployeePage = lazy(() => import('../pages/admin/AdminCreateEmployeePage.jsx'))
+
+// Profile pages
+const ProfilePage = lazy(() => import('../pages/profile/ProfilePage.jsx'))
 
 // Service pages
 const ServiceCategories = lazy(() => import('../pages/services/ServiceCategories.jsx'))
@@ -79,6 +88,12 @@ const RoleRoute = lazy(() => import('../routes/RoleRoute.jsx'))
 
 export function AppRouter() {
   const router = createBrowserRouter([
+    {
+      // Pathless layout: SessionRedirect must render inside the router so it
+      // can navigate, and it must wrap every route so an expiring session
+      // returns the user home from anywhere (dashboards included).
+      element: <SessionRedirect />,
+      children: [
     {
       path: '/',
       element: <PublicLayout />,
@@ -126,6 +141,7 @@ export function AppRouter() {
         { path: 'complaints', element: <TenantComplaints /> },
         { path: 'messages', element: <TenantMessages /> },
         { path: 'notifications', element: <TenantNotifications /> },
+        { path: 'profile', element: <ProfilePage /> },
       ],
     },
     {
@@ -147,6 +163,7 @@ export function AppRouter() {
         { path: 'announcements', element: <LandlordAnnouncements /> },
         { path: 'messages', element: <LandlordMessages /> },
         { path: 'notifications', element: <LandlordOverview /> },
+        { path: 'profile', element: <ProfilePage /> },
       ],
     },
     {
@@ -169,6 +186,7 @@ export function AppRouter() {
         { path: 'billing', element: <EmployeeOverview /> },
         { path: 'messages', element: <EmployeeOverview /> },
         { path: 'notifications', element: <EmployeeOverview /> },
+        { path: 'profile', element: <ProfilePage /> },
       ],
     },
     {
@@ -181,10 +199,12 @@ export function AppRouter() {
         </ProtectedRoute>
       ),
       children: [
-        { index: true, element: <EmployeeOverview /> },
+        { index: true, element: <AdminDashboard /> },
+        { path: 'users', element: <AdminUserListPage /> },
+        { path: 'users/create-employee', element: <AdminCreateEmployeePage /> },
+        { path: 'users/:userId', element: <AdminUserDetailPage /> },
         { path: 'properties', element: <EmployeeProperties /> },
         { path: 'listings', element: <EmployeeListings /> },
-        { path: 'users', element: <EmployeeOverview /> },
         { path: 'leads', element: <EmployeeOverview /> },
         { path: 'viewings', element: <EmployeeViewings /> },
         { path: 'applications', element: <EmployeeApplications /> },
@@ -193,6 +213,7 @@ export function AppRouter() {
         { path: 'commissions', element: <EmployeeOverview /> },
         { path: 'audit', element: <EmployeeOverview /> },
         { path: 'notifications', element: <EmployeeOverview /> },
+        { path: 'profile', element: <ProfilePage /> },
       ],
     },
     {
@@ -221,6 +242,8 @@ export function AppRouter() {
     },
     { path: '/access-denied', element: <AccessDeniedPage /> },
     { path: '*', element: <NotFoundPage /> },
+      ],
+    },
   ])
 
   return (

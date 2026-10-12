@@ -5,15 +5,17 @@ import { useAuth } from '../../contexts/AuthContext.jsx'
 
 export default function HomePage() {
   const navigate = useNavigate()
-  const { isAuthenticated, hasRole, isLoading } = useAuth()
+  const { isAuthenticated, user, isLoading } = useAuth()
   const [searchArea, setSearchArea] = useState('')
   const [searchRent, setSearchRent] = useState('')
   const [searchBedrooms, setSearchBedrooms] = useState('')
 
-  const isTenant = hasRole(['TENANT'])
-
-  if (!isLoading && isAuthenticated && isTenant) {
-    return <Navigate to="/search" replace />
+  if (!isLoading && isAuthenticated) {
+    const roles = (user?.roles || []).map((r) => r.toUpperCase())
+    if (roles.includes('SUPERADMIN')) return <Navigate to="/admin" replace />
+    if (roles.includes('EMPLOYEE')) return <Navigate to="/employee" replace />
+    if (roles.includes('LANDLORD')) return <Navigate to="/landlord" replace />
+    return <Navigate to="/tenant" replace />
   }
 
   const handleSearch = (e) => {
@@ -26,7 +28,7 @@ export default function HomePage() {
   }
 
   return (
-    <div>
+    <div style={{ width: '100%' }}>
       {/* Hero Section */}
       <section
         style={{
@@ -34,7 +36,7 @@ export default function HomePage() {
           padding: 'var(--space-24) 0',
         }}
       >
-        <div className="container" style={{ textAlign: 'center' }}>
+        <div style={{ textAlign: 'center', padding: '0 var(--space-8)' }}>
           <h1
             style={{
               fontSize: 'clamp(2rem, 5vw, 3.5rem)',
@@ -126,7 +128,7 @@ export default function HomePage() {
 
       {/* How It Works */}
       <section style={{ padding: 'var(--space-24) 0' }}>
-        <div className="container">
+        <div style={{ padding: '0 var(--space-8)' }}>
           <h2 style={{ textAlign: 'center', marginBottom: 'var(--space-12)' }}>
             How HomeLink Works
           </h2>
@@ -190,7 +192,7 @@ export default function HomePage() {
           color: 'var(--color-neutral-0)',
         }}
       >
-        <div className="container" style={{ textAlign: 'center' }}>
+        <div style={{ textAlign: 'center', padding: '0 var(--space-8)' }}>
           <h2 style={{ color: 'var(--color-neutral-0)', marginBottom: 'var(--space-4)' }}>
             Own a Property?
           </h2>
@@ -224,7 +226,7 @@ export default function HomePage() {
 
       {/* Tenant CTA */}
       <section style={{ padding: 'var(--space-24) 0' }}>
-        <div className="container" style={{ textAlign: 'center' }}>
+        <div style={{ textAlign: 'center', padding: '0 var(--space-8)' }}>
           <h2 style={{ marginBottom: 'var(--space-4)' }}>Looking for a Rental?</h2>
           <p
             style={{
@@ -249,7 +251,7 @@ export default function HomePage() {
 
       {/* Services Section */}
       <section style={{ padding: 'var(--space-24) 0', background: 'var(--color-neutral-50)' }}>
-        <div className="container">
+        <div style={{ padding: '0 var(--space-8)' }}>
           <h2 style={{ textAlign: 'center', marginBottom: 'var(--space-4)' }}>
             Home Maintenance Services
           </h2>

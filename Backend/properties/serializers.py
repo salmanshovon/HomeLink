@@ -57,6 +57,7 @@ class PropertyUnitSerializer(serializers.ModelSerializer):
 class PublicListingSerializer(serializers.ModelSerializer):
     """Listing data safe for public search results."""
 
+    property_id = serializers.UUIDField(source='property.id', read_only=True)
     property_title = serializers.CharField(source='property.title', read_only=True)
     category = serializers.CharField(source='property.get_category_display', read_only=True)
     district = serializers.CharField(source='property.district', read_only=True)
@@ -68,15 +69,15 @@ class PublicListingSerializer(serializers.ModelSerializer):
     cover_image = serializers.SerializerMethodField()
     unit = PropertyUnitSerializer(read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
-    bedrooms = serializers.IntegerField(source='unit.bedrooms', read_only=True)
-    bathrooms = serializers.IntegerField(source='unit.bathrooms', read_only=True)
-    size_sqft = serializers.DecimalField(source='unit.size_sqft', max_digits=10, decimal_places=2, read_only=True)
-    furnishing = serializers.CharField(source='unit.furnishing', read_only=True)
+    bedrooms = serializers.SerializerMethodField()
+    bathrooms = serializers.SerializerMethodField()
+    size_sqft = serializers.SerializerMethodField()
+    furnishing = serializers.SerializerMethodField()
 
     class Meta:
         model = PropertyListing
         fields = (
-            'id', 'reference', 'property_title', 'category', 'district', 'city', 'area',
+            'id', 'reference', 'property_id', 'property_title', 'category', 'district', 'city', 'area',
             'block', 'public_location', 'landmark', 'monthly_rent', 'security_deposit',
             'advance_months', 'service_charge', 'availability_date', 'preferred_tenant',
             'bedrooms', 'bathrooms', 'size_sqft', 'furnishing', 'cover_image', 'unit',
@@ -84,11 +85,49 @@ class PublicListingSerializer(serializers.ModelSerializer):
         )
 
     def get_cover_image(self, obj):
-        cover = obj.media.filter(is_cover=True, media_type=PropertyMediaType.IMAGE).first()
+        images = {'media_type': PropertyMediaType.IMAGE, 'visibility': MediaVisibility.PUBLIC}
+
+        cover = obj.media.filter(is_cover=True, **images).first()
         if cover:
             return cover.file.url
-        first = obj.media.filter(media_type=PropertyMediaType.IMAGE).first()
-        return first.file.url if first else None
+
+        listing_image = obj.media.filter(**images).first()
+        if listing_image:
+            return listing_image.file.url
+
+        # Uploads attach media to the property, not to the listing.
+        property_cover = obj.property.media.filter(is_cover=True, **images).first()
+        if property_cover:
+            return property_cover.file.url
+
+        property_image = obj.property.media.filter(**images).first()
+        return property_image.file.url if property_image else None
+
+    def _unit(self, obj):
+        """The listing's unit, falling back to the property's first unit.
+
+        Listings are not always linked to a unit, but the property almost
+        always has one, so fall back to it rather than returning nulls.
+        """
+        if obj.unit_id:
+            return obj.unit
+        return obj.property.units.order_by('unit_number').first()
+
+    def get_bedrooms(self, obj):
+        unit = self._unit(obj)
+        return unit.bedrooms if unit else None
+
+    def get_bathrooms(self, obj):
+        unit = self._unit(obj)
+        return unit.bathrooms if unit else None
+
+    def get_size_sqft(self, obj):
+        unit = self._unit(obj)
+        return unit.size_sqft if unit else None
+
+    def get_furnishing(self, obj):
+        unit = self._unit(obj)
+        return unit.furnishing if unit else None
 
 
 class PublicPropertySerializer(serializers.ModelSerializer):
@@ -103,6 +142,36 @@ class PublicPropertySerializer(serializers.ModelSerializer):
             'id', 'reference', 'title', 'category', 'district', 'city', 'area',
             'block', 'public_location', 'landmark', 'latitude', 'longitude',
             'listings', 'units',
+        )
+
+
+class PropertyContactDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PropertyContactDetails
+        fields = (
+            'id', 'contact_name', 'contact_type', 'primary_phone', 'alternate_phone',
+            'preferred_contact_time', 'internal_notes', 'key_access_arrangements', 'visibility',
+        )
+
+
+class PropertyStaffSerializer(serializers.ModelSerializer):
+    """Full property detail for staff/admin: includes private address and contacts."""
+
+    listings = PublicListingSerializer(many=True, read_only=True)
+    units = PropertyUnitSerializer(many=True, read_only=True)
+    landlord_name = serializers.CharField(source='landlord.landlord_profile.legal_name', read_only=True, default=None)
+    contacts = PropertyContactDetailsSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Property
+        fields = (
+            'id', 'reference', 'title', 'category', 'district', 'city', 'area',
+            'block', 'public_location', 'landmark', 'latitude', 'longitude',
+            'full_private_address', 'society_name', 'road_number', 'house_number',
+            'building_name', 'postal_code', 'division', 'country',
+            'ownership_verified', 'verification_notes', 'verified_by', 'verified_at',
+            'status', 'landlord', 'landlord_name', 'manager', 'created_by_employee',
+            'listings', 'units', 'contacts', 'created_at', 'updated_at',
         )
 
 
@@ -127,6 +196,13 @@ class PropertyOwnerSerializer(serializers.ModelSerializer):
 
 
 class PropertyCreateSerializer(serializers.ModelSerializer):
+    """Write serializer for property location.
+
+    Validates the division/district/city/area chain against the reference
+    Location tree, so a city can never be attached to the wrong district and an
+    area can never be attached to the wrong city.
+    """
+
     class Meta:
         model = Property
         fields = (
@@ -135,6 +211,58 @@ class PropertyCreateSerializer(serializers.ModelSerializer):
             'landmark', 'latitude', 'longitude', 'full_private_address', 'public_location',
             'status',
         )
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+
+        from locations.models import Location, LocationLevel
+
+        division = attrs.get('division')
+        district = attrs.get('district')
+        city = attrs.get('city')
+        area = attrs.get('area')
+
+        # Only validate a level that was actually submitted; partial updates
+        # (PATCH) legitimately omit untouched fields.
+        if division:
+            if not Location.objects.filter(
+                level=LocationLevel.DIVISION, name=division, is_active=True
+            ).exists():
+                raise serializers.ValidationError({'division': f'Unknown division "{division}".'})
+
+        if district:
+            match = Location.objects.filter(
+                level=LocationLevel.DISTRICT, name=district, is_active=True
+            )
+            if not match.exists():
+                raise serializers.ValidationError({'district': f'Unknown district "{district}".'})
+            if division:
+                if not match.filter(parent__name=division).exists():
+                    raise serializers.ValidationError({
+                        'district': f'"{district}" does not belong to the "{division}" division.',
+                    })
+
+        if city:
+            match = Location.objects.filter(
+                level=LocationLevel.CITY, name=city, is_active=True
+            )
+            if not match.exists():
+                raise serializers.ValidationError({'city': f'Unknown city "{city}".'})
+            if district:
+                if not match.filter(parent__name=district).exists():
+                    raise serializers.ValidationError({
+                        'city': f'"{city}" does not belong to the "{district}" district.',
+                    })
+
+        if area and city:
+            if not Location.objects.filter(
+                level=LocationLevel.AREA, name=area, parent__name=city, is_active=True
+            ).exists():
+                raise serializers.ValidationError({
+                    'area': f'"{area}" is not a known area of "{city}".',
+                })
+
+        return attrs
 
 
 class PropertyListingCreateSerializer(serializers.ModelSerializer):
@@ -187,15 +315,6 @@ class OwnershipDocumentSerializer(serializers.ModelSerializer):
             'reviewed_by', 'review_notes', 'reviewed_at', 'created_at',
         )
         read_only_fields = ('id', 'submitted_by', 'verification_status', 'reviewed_by', 'reviewed_at', 'created_at')
-
-
-class PropertyContactDetailsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PropertyContactDetails
-        fields = (
-            'id', 'contact_name', 'contact_type', 'primary_phone', 'alternate_phone',
-            'preferred_contact_time', 'internal_notes', 'key_access_arrangements', 'visibility',
-        )
 
 
 class PropertyVisitLogSerializer(serializers.ModelSerializer):

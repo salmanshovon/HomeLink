@@ -40,6 +40,7 @@ from .serializers import (
     PropertyListingOwnerSerializer,
     PropertyMediaSerializer,
     PropertyOwnerSerializer,
+    PropertyStaffSerializer,
     PropertyUnitSerializer,
     PublicListingSerializer,
     PublicPropertySerializer,
@@ -62,9 +63,20 @@ class PublicPropertyViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = StandardResultsSetPagination
     permission_classes = [permissions.AllowAny]
 
+    def get_permissions(self):
+        # 'save' mutates per-user state and must never run as AnonymousUser.
+        # This action is wired manually in urls.py via as_view({...}), which
+        # bypasses the @action permission_classes initkwargs, so enforce it here.
+        if self.action == 'save':
+            return [IsAuthenticatedAndActive()]
+        return super().get_permissions()
+
     def get_serializer_class(self):
         if self.action == 'list':
             return PublicListingSerializer
+        # Staff/admin get full details including private address and contacts
+        if self.request.user.is_authenticated and (self.request.user.is_staff or self.request.user.is_superuser):
+            return PropertyStaffSerializer
         return PublicPropertySerializer
 
     def get_queryset(self):
@@ -73,6 +85,16 @@ class PublicPropertyViewSet(viewsets.ReadOnlyModelViewSet):
                 status=ListingStatus.PUBLISHED,
                 verification_status=ListingVerification.VERIFIED,
             ).select_related('property', 'unit').prefetch_related('unit__amenities', 'media')
+        # For retrieve: staff see all properties, public only see published
+        user = self.request.user
+        if user.is_authenticated and (user.is_staff or user.is_superuser):
+            return Property.objects.all().prefetch_related(
+                Prefetch('listings', queryset=PropertyListing.objects.filter(
+                    status=ListingStatus.PUBLISHED,
+                    verification_status=ListingVerification.VERIFIED,
+                )),
+                'units',
+            )
         return Property.objects.filter(
             listings__status=ListingStatus.PUBLISHED,
             listings__verification_status=ListingVerification.VERIFIED,
@@ -90,7 +112,52 @@ class PublicPropertyViewSet(viewsets.ReadOnlyModelViewSet):
         media = prop.media.filter(visibility=MediaVisibility.PUBLIC)
         return Response(PropertyMediaSerializer(media, many=True).data)
 
-    @decorators.action(detail=True, methods=['post', 'delete'])
+    @decorators.action(detail=True, methods=['post'], url_path='upload-media')
+    def upload_media(self, request, pk=None):
+        """Upload media for a property. Images are resized and watermarked.
+
+        This viewset is public for reads, so ownership is enforced explicitly.
+        """
+        prop = self.get_object()
+        user = request.user
+        if not (user.is_authenticated and (user.is_staff or user.is_superuser
+                                           or prop.landlord_id == user.id
+                                           or prop.manager_id == user.id)):
+            return Response(
+                {'error': {'code': 'forbidden', 'message': 'You cannot upload media to this property.'}},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        files = request.FILES.getlist('files')
+        if not files:
+            return Response(
+                {'error': {'code': 'no_files', 'message': 'No files provided.'}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        media_type = request.data.get('media_type', 'image')
+        caption = request.data.get('caption', '')
+        is_cover = request.data.get('is_cover', False)
+
+        created = []
+        for f in files:
+            m = PropertyMedia.objects.create(
+                property=prop,
+                file=f,
+                media_type=media_type,
+                caption=caption,
+                is_cover=is_cover,
+                uploaded_by=request.user if request.user.is_authenticated else None,
+            )
+            created.append(m)
+        return Response(PropertyMediaSerializer(created, many=True).data, status=status.HTTP_201_CREATED)
+
+    @decorators.action(
+        detail=True,
+        methods=['post', 'delete'],
+        # Saving requires an account. Without this the handler receives an
+        # AnonymousUser and assigning it to the UUID user FK raises a 500.
+        permission_classes=[IsAuthenticatedAndActive],
+    )
     def save(self, request, pk=None):
         prop = self.get_object()
         if request.method == 'DELETE':
@@ -217,13 +284,64 @@ class LandlordPropertyViewSet(viewsets.ModelViewSet):
         prop = create_property(actor=self.request.user, landlord=self.request.user, data=data)
         return prop
 
-    @decorators.action(detail=True, methods=['post'], serializer_class=PropertyUnitSerializer)
-    def units(self, request, pk=None):
+    @decorators.action(detail=True, methods=['post'], url_path='units')
+    def create_unit(self, request, pk=None):
+        """Add a unit to a property. Uses PropertyUnitSerializer directly —
+        self.get_serializer() would resolve to PropertyOwnerSerializer and reject
+        the unit payload."""
         prop = self.get_object()
-        serializer = self.get_serializer(data=request.data)
+        serializer = PropertyUnitSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        unit = PropertyUnit.objects.create(property=prop, **serializer.validated_data)
+        unit = serializer.save(property=prop)
         return Response(PropertyUnitSerializer(unit).data, status=status.HTTP_201_CREATED)
+
+    @decorators.action(detail=True, methods=['get'], url_path='media')
+    def list_media(self, request, pk=None):
+        """All media for a property, so the owner can curate it while editing.
+
+        Ownership is implicit: get_queryset() only returns the requester's own
+        properties, so get_object() 404s for anyone else's.
+        """
+        prop = self.get_object()
+        return Response(PropertyMediaSerializer(prop.media.all(), many=True).data)
+
+    @decorators.action(detail=True, methods=['delete'], url_path='media/(?P<media_id>[^/.]+)')
+    def delete_media(self, request, pk=None, media_id=None):
+        """Delete a single media item (and its underlying file)."""
+        prop = self.get_object()
+        media = prop.media.filter(pk=media_id).first()
+        if not media:
+            return Response(
+                {'error': {'code': 'not_found', 'message': 'Media not found.'}},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        # Remove the file from storage first, then the row.
+        media.file.delete(save=False)
+        media.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @decorators.action(detail=True, methods=['get', 'patch', 'put', 'delete'], url_path='units/(?P<unit_id>[^/.]+)')
+    def unit_detail(self, request, pk=None, unit_id=None):
+        """Retrieve, update, or delete a single unit of a property."""
+        prop = self.get_object()
+        unit = prop.units.filter(pk=unit_id).first()
+        if not unit:
+            return Response(
+                {'error': {'code': 'not_found', 'message': 'Unit not found.'}},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if request.method == 'GET':
+            return Response(PropertyUnitSerializer(unit).data)
+
+        if request.method == 'DELETE':
+            unit.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        serializer = PropertyUnitSerializer(unit, data=request.data, partial=(request.method == 'PATCH'))
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(PropertyUnitSerializer(unit).data)
 
 
 class LandlordListingViewSet(viewsets.ModelViewSet):

@@ -1,16 +1,24 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { ArrowLeft } from 'lucide-react'
 import { searchListings, getLocationFacets, getAmenities } from '../../api/properties.api.js'
 import { PropertyCard } from '../../components/property/PropertyCard.jsx'
 import { SkeletonCard } from '../../components/common/LoadingSpinner.jsx'
 import { EmptyState } from '../../components/common/EmptyState.jsx'
 import { ErrorState } from '../../components/common/ErrorState.jsx'
+import { useAuth } from '../../contexts/AuthContext.jsx'
 
 const PAGE_SIZE = 12
 
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { isAuthenticated, user } = useAuth()
+  const roles = (user?.roles || []).map((r) => r.toUpperCase())
+  const dashboardRoute = roles.includes('SUPERADMIN') ? '/admin'
+    : roles.includes('EMPLOYEE') ? '/employee'
+    : roles.includes('LANDLORD') ? '/landlord'
+    : '/tenant'
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
     area: searchParams.get('area') || '',
@@ -93,7 +101,19 @@ export default function SearchPage() {
 
   return (
     <div className="container" style={{ padding: 'var(--space-8) 0' }}>
-      <h1 style={{ marginBottom: 'var(--space-8)' }}>Search Properties</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-8)' }}>
+        <h1 style={{ margin: 0 }}>Search Properties</h1>
+        {isAuthenticated && (
+          <Link
+            to={dashboardRoute}
+            className="btn btn-secondary btn-sm"
+            style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)' }}
+          >
+            <ArrowLeft size={16} />
+            Back to Dashboard
+          </Link>
+        )}
+      </div>
 
       <div style={{ display: 'flex', gap: 'var(--space-8)', flexWrap: 'wrap' }}>
         {/* Filters sidebar */}

@@ -62,6 +62,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     'common',
     'accounts',
+    'locations',
     'properties',
     'search',
     'leads',
@@ -148,16 +149,19 @@ USE_TZ = True
 # --------------------------------------------------------------------------
 # Static & media
 # --------------------------------------------------------------------------
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-MEDIA_URL = 'media/'
+# Absolute (leading slash) so image URLs resolve correctly from nested routes
+# such as /properties/<uuid>. A relative 'media/' would resolve against the
+# current path and 404.
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Private media (documents, agreements, identity files) is served through
 # permission-checked endpoints, never via the static/media web server.
 PRIVATE_MEDIA_ROOT = BASE_DIR / 'private_media'
-PRIVATE_MEDIA_URL = 'private-media/'
+PRIVATE_MEDIA_URL = '/private-media/'
 
 # --------------------------------------------------------------------------
 # Default primary key field type

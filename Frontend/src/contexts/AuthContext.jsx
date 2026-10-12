@@ -1,10 +1,17 @@
-import { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import {
   login as apiLogin,
   logout as apiLogout,
   fetchCurrentUser,
 } from '../api/auth.api.js'
-import { setAccessToken, clearAccessToken, getAccessToken, getRefreshToken } from '../api/client.js'
+import {
+  SESSION_EXPIRED_EVENT,
+  setAccessToken,
+  clearAccessToken,
+  clearRefreshToken,
+  getAccessToken,
+  getRefreshToken,
+} from '../api/client.js'
 
 const AuthContext = createContext(null)
 
@@ -12,6 +19,24 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const userRef = useRef(null)
+
+  const resetSession = useCallback(() => {
+    clearAccessToken()
+    clearRefreshToken()
+    userRef.current = null
+    setUser(null)
+    setIsAuthenticated(false)
+    setIsLoading(false)
+  }, [])
+
+  // The API client emits this when the refresh token is missing/expired.
+  // Clear auth state here; <SessionRedirect> (rendered inside the router)
+  // performs the actual navigation home.
+  useEffect(() => {
+    window.addEventListener(SESSION_EXPIRED_EVENT, resetSession)
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, resetSession)
+  }, [resetSession])
 
   useEffect(() => {
     let mounted = true
@@ -24,12 +49,15 @@ export function AuthProvider({ children }) {
         try {
           const data = await fetchCurrentUser()
           if (mounted) {
+            userRef.current = data.user
             setUser(data.user)
             setIsAuthenticated(true)
           }
         } catch {
-          if (mounted) {
-            clearAccessToken()
+          // If the refresh token is the problem the API client will have
+          // emitted SESSION_EXPIRED_EVENT, which resets state for us.
+          if (mounted && !hasRefreshToken) {
+            resetSession()
           }
         }
       }
@@ -39,10 +67,11 @@ export function AuthProvider({ children }) {
 
     restoreSession()
     return () => { mounted = false }
-  }, [])
+  }, [resetSession])
 
   const login = useCallback(async (phoneNumber, password) => {
     const { user: userData } = await apiLogin(phoneNumber, password)
+    userRef.current = userData
     setUser(userData)
     setIsAuthenticated(true)
     return userData
@@ -50,18 +79,20 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     await apiLogout()
+    userRef.current = null
     setUser(null)
     setIsAuthenticated(false)
   }, [])
 
   const hasRole = useCallback(
     (roles) => {
-      if (!user) return false
+      const currentUser = userRef.current
+      if (!currentUser) return false
       if (!roles || roles.length === 0) return true
-      const userRoles = (user.roles || []).map((r) => r.toUpperCase())
+      const userRoles = (currentUser.roles || []).map((r) => r.toUpperCase())
       return roles.some((role) => userRoles.includes(role.toUpperCase()))
     },
-    [user],
+    [],
   )
 
   return (

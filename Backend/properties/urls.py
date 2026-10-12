@@ -26,6 +26,10 @@ urlpatterns = [
     path('properties/saved/', views.SavedPropertyViewSet.as_view({'get': 'list', 'post': 'create'}), name='property-saved-list'),
     path('properties/<uuid:pk>/', views.PublicPropertyViewSet.as_view({'get': 'retrieve'}), name='property-detail'),
     path('properties/<uuid:pk>/media/', views.PublicPropertyViewSet.as_view({'get': 'media'}), name='property-media'),
+    path('properties/<uuid:pk>/upload-media/', views.PublicPropertyViewSet.as_view({'post': 'upload_media'}), name='property-upload-media'),
+    # Owner-scoped media management (get_queryset restricts to own properties).
+    path('landlord/properties/<uuid:pk>/media/', views.LandlordPropertyViewSet.as_view({'get': 'list_media'}), name='landlord-property-media-list'),
+    path('landlord/properties/<uuid:pk>/media/<uuid:media_id>/', views.LandlordPropertyViewSet.as_view({'delete': 'delete_media'}), name='landlord-property-media-delete'),
     path('properties/<uuid:pk>/save/', views.PublicPropertyViewSet.as_view({'post': 'save', 'delete': 'save'}), name='property-save'),
     path('properties/<uuid:pk>/inquiries/', views.PropertyInquiryViewSet.as_view({'post': 'create'}), name='property-inquiry-create'),
     path('properties/<uuid:pk>/location-access/', views.LocationAccessRequestView.as_view(), name='property-location-access'),

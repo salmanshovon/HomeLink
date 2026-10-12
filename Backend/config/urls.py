@@ -26,6 +26,7 @@ urlpatterns = [
 
     # API v1
     path('api/v1/', include('accounts.urls')),
+    path('api/v1/', include('locations.urls')),
     path('api/v1/', include('properties.urls')),
     path('api/v1/', include('search.urls')),
     path('api/v1/', include('leads.urls')),

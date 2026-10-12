@@ -25,6 +25,28 @@ export async function addUnit(propertyId, payload) {
   return response.data
 }
 
+export async function updateUnit(propertyId, unitId, payload) {
+  const response = await apiClient.patch(`/landlord/properties/${propertyId}/units/${unitId}/`, payload)
+  return response.data
+}
+
+export async function uploadPropertyMedia(propertyId, formData) {
+  const response = await apiClient.post(`/properties/${propertyId}/upload-media/`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  return response.data
+}
+
+export async function getPropertyMedia(propertyId) {
+  const response = await apiClient.get(`/landlord/properties/${propertyId}/media/`)
+  return response.data
+}
+
+export async function deletePropertyMedia(propertyId, mediaId) {
+  const response = await apiClient.delete(`/landlord/properties/${propertyId}/media/${mediaId}/`)
+  return response.data
+}
+
 export async function getMyListings(params = {}) {
   const response = await apiClient.get('/landlord/listings/', { params })
   return response.data

@@ -1,5 +1,20 @@
 import { apiClient } from './client.js'
 
+/**
+ * Cascading location lookup.
+ *
+ *   fetchLocations('division')
+ *   fetchLocations('district', divisionId)
+ *   fetchLocations('city', districtId)
+ *   fetchLocations('area', cityId)
+ */
+export async function fetchLocations(level, parentId = null) {
+  const params = { level }
+  if (parentId) params.parent = parentId
+  const response = await apiClient.get('/locations/', { params })
+  return response.data
+}
+
 export async function searchListings(params = {}) {
   const response = await apiClient.get('/listings/', { params })
   return response.data

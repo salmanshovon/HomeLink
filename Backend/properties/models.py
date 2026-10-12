@@ -1,9 +1,12 @@
 """Property domain: properties, units, amenities, listings, media, documents."""
 
 import uuid
+import os
+import io
 
 from django.conf import settings
 from django.core.validators import MinValueValidator
+from django.core.files.base import ContentFile
 from django.db import models
 
 from common.models import TimeStampedModel
@@ -293,6 +296,69 @@ class PropertyMedia(TimeStampedModel):
 
     def __str__(self):
         return f'media:{self.property_id}:{self.media_type}'
+
+    @staticmethod
+    def process_image(file_obj, max_size=(1000, 1000), watermark_text='homelink', opacity=0.2):
+        """Resize image to max dimensions and add a watermark."""
+        from PIL import Image, ImageDraw, ImageFont
+
+        img = Image.open(file_obj)
+        if img.mode != 'RGBA':
+            img = img.convert('RGBA')
+
+        # Resize maintaining aspect ratio
+        img.thumbnail(max_size, Image.Resampling.LANCZOS)
+
+        # Add watermark
+        watermark = Image.new('RGBA', img.size, (255, 255, 255, 0))
+        draw = ImageDraw.Draw(watermark)
+
+        # Try to use a font, fall back to default
+        try:
+            font = ImageFont.truetype('arial.ttf', size=max(20, img.size[0] // 15))
+        except (IOError, OSError):
+            try:
+                font = ImageFont.truetype('DejaVuSans.ttf', size=max(20, img.size[0] // 15))
+            except (IOError, OSError):
+                font = ImageFont.load_default()
+
+        # Get text bounding box
+        bbox = draw.textbbox((0, 0), watermark_text, font=font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
+
+        # Position: centred horizontally and vertically.
+        # bbox offsets are non-zero for most fonts, so account for them when
+        # computing the origin for draw.text().
+        x = (img.size[0] - text_width) / 2 - bbox[0]
+        y = (img.size[1] - text_height) / 2 - bbox[1]
+
+        # Draw text with opacity
+        alpha = int(255 * opacity)
+        draw.text((x, y), watermark_text, fill=(255, 255, 255, alpha), font=font)
+
+        # Composite and save
+        combined = Image.alpha_composite(img, watermark)
+
+        # Save to buffer
+        buffer = io.BytesIO()
+        if img.format == 'PNG' or file_obj.name.lower().endswith('.png'):
+            combined.save(buffer, format='PNG', optimize=True)
+        else:
+            combined = combined.convert('RGB')
+            combined.save(buffer, format='JPEG', quality=85, optimize=True)
+        buffer.seek(0)
+
+        return ContentFile(buffer.read(), name=file_obj.name)
+
+    def save(self, *args, **kwargs):
+        # Process images on upload
+        if self.media_type == PropertyMediaType.IMAGE and self.file:
+            try:
+                self.file = self.process_image(self.file)
+            except Exception:
+                pass  # If processing fails, save original
+        super().save(*args, **kwargs)
 
 
 class OwnershipDocumentType(models.TextChoices):
