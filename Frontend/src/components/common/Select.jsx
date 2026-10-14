@@ -10,15 +10,15 @@ export const Select = forwardRef(function Select(
   const hintId = `${selectId}-hint`
 
   return (
-    <div className="form-field" style={{ marginBottom: 'var(--space-4)' }}>
+    <div className="form-field" style={{ marginBottom: 'var(--space-3)' }}>
       {label && (
         <label
           htmlFor={selectId}
           style={{
             display: 'block',
-            marginBottom: 'var(--space-2)',
+            marginBottom: 'var(--space-1)',
             fontWeight: 'var(--font-medium)',
-            fontSize: 'var(--text-sm)',
+            fontSize: 'var(--text-xs)',
           }}
         >
           {label}
@@ -44,7 +44,7 @@ export const Select = forwardRef(function Select(
           role="alert"
           style={{
             marginTop: 'var(--space-1)',
-            fontSize: 'var(--text-sm)',
+            fontSize: 'var(--text-xs)',
             color: 'var(--color-danger-600)',
           }}
         >
@@ -56,7 +56,7 @@ export const Select = forwardRef(function Select(
           id={hintId}
           style={{
             marginTop: 'var(--space-1)',
-            fontSize: 'var(--text-sm)',
+            fontSize: 'var(--text-xs)',
             color: 'var(--color-neutral-500)',
           }}
         >

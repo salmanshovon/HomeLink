@@ -19,7 +19,7 @@ export function AppProviders({ children }) {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         {children}
-        {import.meta.env.DEV && import.meta.env.VITE_ENABLE_QUERY_DEVTOOLS !== 'false' && (
+        {import.meta.env.DEV && (
           <ReactQueryDevtools initialIsOpen={false} />
         )}
       </AuthProvider>

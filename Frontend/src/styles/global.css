@@ -229,8 +229,8 @@ img {
 .select,
 .textarea {
   width: 100%;
-  padding: var(--space-3) var(--space-4);
-  font-size: var(--text-base);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
   font-family: var(--font-sans);
   line-height: var(--leading-normal);
   color: var(--color-neutral-800);
@@ -251,6 +251,7 @@ img {
 .input::placeholder,
 .textarea::placeholder {
   color: var(--color-neutral-400);
+  font-size: var(--text-sm);
 }
 
 .input:disabled,
@@ -261,8 +262,9 @@ img {
 }
 
 .textarea {
-  min-height: 120px;
+  min-height: 80px;
   resize: vertical;
+  font-size: var(--text-sm);
 }
 
 /* ----- Badges ----- */

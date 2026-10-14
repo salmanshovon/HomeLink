@@ -22,12 +22,13 @@ export function DashboardHeader({ onMenuToggle, menuOpen }) {
         top: 0,
         zIndex: 'var(--z-sticky)',
         background: 'var(--color-neutral-0)',
-        borderBottom: '1px solid var(--border-color)',
+        borderBottom: '1px solid var(--color-neutral-200)',
         height: 'var(--header-height)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 var(--space-6)',
+        boxShadow: 'var(--shadow-sm)',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
@@ -40,19 +41,21 @@ export function DashboardHeader({ onMenuToggle, menuOpen }) {
             border: 'none',
             cursor: 'pointer',
             padding: 'var(--space-2)',
-            color: 'var(--color-neutral-700)',
+            color: 'var(--color-neutral-600)',
+            borderRadius: 'var(--radius-md)',
           }}
           className="mobile-menu-toggle"
         >
-          {menuOpen ? <X size={24} /> : <Menu size={24} />}
+          {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
         <Link
           to="/"
           style={{
             fontSize: 'var(--text-lg)',
             fontWeight: 'var(--font-bold)',
-            color: 'var(--color-brand-700)',
+            color: 'var(--color-neutral-900)',
             textDecoration: 'none',
+            letterSpacing: '-0.025em',
           }}
         >
           HomeLink
@@ -65,92 +68,93 @@ export function DashboardHeader({ onMenuToggle, menuOpen }) {
           className="btn btn-secondary btn-sm"
           style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)' }}
         >
-          <Search size={16} />
+          <Search size={15} />
           Search
         </Link>
         <div style={{ position: 'relative' }}>
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-          aria-expanded={dropdownOpen}
-          aria-label="User menu"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--space-2)',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: 'var(--space-2) var(--space-3)',
-            borderRadius: 'var(--radius-md)',
-            fontSize: 'var(--text-sm)',
-            color: 'var(--color-neutral-700)',
-          }}
-        >
-          <User size={18} />
-          <span>{user?.first_name || user?.phone_number || 'Account'}</span>
-        </button>
-
-        {dropdownOpen && (
-          <div
+            aria-expanded={dropdownOpen}
+            aria-label="User menu"
             style={{
-              position: 'absolute',
-              right: 0,
-              top: '100%',
-              marginTop: 'var(--space-2)',
-              background: 'var(--color-neutral-0)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-lg)',
-              boxShadow: 'var(--shadow-lg)',
-              minWidth: '180px',
-              padding: 'var(--space-2)',
-              zIndex: 'var(--z-dropdown)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-2)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 'var(--space-2) var(--space-3)',
+              borderRadius: 'var(--radius-md)',
+              fontSize: 'var(--text-sm)',
+              fontWeight: 'var(--font-medium)',
+              color: 'var(--color-neutral-700)',
             }}
           >
-            <button
-              onClick={() => { setDropdownOpen(false); navigate(profilePath) }}
+            <User size={18} />
+            <span>{user?.first_name || user?.phone_number || 'Account'}</span>
+          </button>
+
+          {dropdownOpen && (
+            <div
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--space-2)',
-                width: '100%',
-                padding: 'var(--space-3) var(--space-4)',
-                background: 'none',
-                border: 'none',
-                borderRadius: 'var(--radius-md)',
-                cursor: 'pointer',
-                fontSize: 'var(--text-sm)',
-                color: 'var(--color-neutral-700)',
-                textAlign: 'left',
+                position: 'absolute',
+                right: 0,
+                top: '100%',
+                marginTop: 'var(--space-2)',
+                background: 'var(--color-neutral-0)',
+                border: '1px solid var(--color-neutral-200)',
+                borderRadius: 'var(--radius-lg)',
+                boxShadow: 'var(--shadow-lg)',
+                minWidth: '180px',
+                padding: 'var(--space-2)',
+                zIndex: 'var(--z-dropdown)',
               }}
             >
-              <User size={16} />
-              My Profile
-            </button>
-            <button
-              onClick={() => {
-                setDropdownOpen(false)
-                logout()
-              }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--space-2)',
-                width: '100%',
-                padding: 'var(--space-3) var(--space-4)',
-                background: 'none',
-                border: 'none',
-                borderRadius: 'var(--radius-md)',
-                cursor: 'pointer',
-                fontSize: 'var(--text-sm)',
-                color: 'var(--color-neutral-700)',
-                textAlign: 'left',
-              }}
-            >
-              <LogOut size={16} />
-              Sign Out
-            </button>
-          </div>
-        )}
+              <button
+                onClick={() => { setDropdownOpen(false); navigate(profilePath) }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 'var(--space-2)',
+                  width: '100%',
+                  padding: 'var(--space-3) var(--space-4)',
+                  background: 'none',
+                  border: 'none',
+                  borderRadius: 'var(--radius-md)',
+                  cursor: 'pointer',
+                  fontSize: 'var(--text-sm)',
+                  color: 'var(--color-neutral-700)',
+                  textAlign: 'left',
+                }}
+              >
+                <User size={16} />
+                My Profile
+              </button>
+              <button
+                onClick={() => {
+                  setDropdownOpen(false)
+                  logout()
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 'var(--space-2)',
+                  width: '100%',
+                  padding: 'var(--space-3) var(--space-4)',
+                  background: 'none',
+                  border: 'none',
+                  borderRadius: 'var(--radius-md)',
+                  cursor: 'pointer',
+                  fontSize: 'var(--text-sm)',
+                  color: 'var(--color-neutral-700)',
+                  textAlign: 'left',
+                }}
+              >
+                <LogOut size={16} />
+                Sign Out
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

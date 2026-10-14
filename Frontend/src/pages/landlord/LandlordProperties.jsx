@@ -13,6 +13,7 @@ import { ConfirmDialog } from '../../components/common/ConfirmDialog.jsx'
 import { LoadingSpinner } from '../../components/common/LoadingSpinner.jsx'
 import { EmptyState } from '../../components/common/EmptyState.jsx'
 import { ErrorState } from '../../components/common/ErrorState.jsx'
+import { PropertyCard } from '../../components/property/PropertyCard.jsx'
 
 const emptyForm = {
   title: '',
@@ -68,6 +69,28 @@ export default function LandlordProperties() {
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['landlord-properties'],
     queryFn: () => getMyProperties(),
+  })
+
+  const propertyIds = (data?.results || []).map(p => p.id)
+
+  const { data: mediaData } = useQuery({
+    queryKey: ['landlord-property-media', propertyIds],
+    queryFn: async () => {
+      const results = await Promise.all(
+        propertyIds.map(async (id) => {
+          try {
+            const media = await getPropertyMedia(id)
+            const items = media?.results || media || []
+            const cover = items.find(m => m.is_cover) || items[0]
+            return { id, coverImage: cover?.file || null }
+          } catch {
+            return { id, coverImage: null }
+          }
+        })
+      )
+      return Object.fromEntries(results.map(r => [r.id, r.coverImage]))
+    },
+    enabled: propertyIds.length > 0,
   })
 
   // --- Cascading location lookups -------------------------------------------
@@ -325,6 +348,28 @@ export default function LandlordProperties() {
 
   const results = data?.results || []
 
+  const toCardProperty = (property) => {
+    const unit = property.units?.[0]
+    const listing = property.listings?.[0]
+    const coverImage = mediaData?.[property.id] || listing?.cover_image || property.cover_image || null
+    return {
+      ...property,
+      cover_image: coverImage,
+      property_id: property.id,
+      monthly_rent: listing?.monthly_rent ?? unit?.monthly_rent ?? null,
+      bedrooms: listing?.bedrooms ?? unit?.bedrooms ?? null,
+      bathrooms: listing?.bathrooms ?? unit?.bathrooms ?? null,
+      size_sqft: listing?.size_sqft ?? unit?.size_sqft ?? null,
+      preferred_tenant: listing?.preferred_tenant ?? property.preferred_tenant ?? null,
+      status: listing?.status ?? (property.status === 'active' ? 'published' : property.status),
+      status_display: listing?.status_display ?? (property.status === 'active' ? 'Published' : property.status),
+      _isOwner: true,
+      _ownershipVerified: property.ownership_verified,
+      _category: property.category,
+      _unitCount: property.units?.length || 0,
+    }
+  }
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-8)' }}>
@@ -339,32 +384,15 @@ export default function LandlordProperties() {
       ) : results.length === 0 ? (
         <EmptyState icon="🏢" title="No properties" description="Add your first property to start listing on HomeLink." />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 'var(--space-6)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--space-6)' }}>
           {results.map((property) => (
-            <Card key={property.id}>
-              <CardBody>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--space-4)' }}>
-                  <div>
-                    <h3 style={{ margin: '0 0 var(--space-2)' }}>{property.title}</h3>
-                    <p style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--color-neutral-500)' }}>
-                      {formatLocation(property)}
-                    </p>
-                  </div>
-                  <Badge variant={property.ownership_verified ? 'success' : 'warning'}>
-                    {property.ownership_verified ? 'Verified' : 'Unverified'}
-                  </Badge>
-                </div>
-                <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-neutral-600)', marginBottom: 'var(--space-4)' }}>
-                  <div><strong>Type:</strong> {property.category?.replace(/_/g, ' ')}</div>
-                  <div><strong>Units:</strong> {property.units?.length || 0}</div>
-                  <div><strong>Status:</strong> {property.status}</div>
-                </div>
-                <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
-                  <Button size="sm" variant="outline" onClick={() => openEditForm(property)}>Edit</Button>
-                  <Button size="sm" variant="danger" onClick={() => setDeletingProperty(property)}>Delete</Button>
-                </div>
-              </CardBody>
-            </Card>
+            <div key={property.id}>
+              <PropertyCard property={toCardProperty(property)} isOwner={true} />
+              <div style={{ display: 'flex', gap: 'var(--space-2)', marginTop: 'var(--space-2)', padding: '0 var(--space-1)' }}>
+                <Button size="sm" variant="outline" onClick={() => openEditForm(property)}>Edit</Button>
+                <Button size="sm" variant="danger" onClick={() => setDeletingProperty(property)}>Delete</Button>
+              </div>
+            </div>
           ))}
         </div>
       )}

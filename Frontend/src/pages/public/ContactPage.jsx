@@ -35,9 +35,9 @@ export default function ContactPage() {
       </div>
 
       <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-        <form onSubmit={handleSubmit} className="card" style={{ padding: 'var(--space-8)' }}>
-          <div style={{ marginBottom: 'var(--space-4)' }}>
-            <label htmlFor="contact-name" style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 'var(--font-medium)', fontSize: 'var(--text-sm)' }}>
+        <form onSubmit={handleSubmit} className="card" style={{ padding: 'var(--space-6)' }}>
+          <div style={{ marginBottom: 'var(--space-3)' }}>
+            <label htmlFor="contact-name" style={{ display: 'block', marginBottom: 'var(--space-1)', fontWeight: 'var(--font-medium)', fontSize: 'var(--text-xs)' }}>
               Name <span style={{ color: 'var(--color-danger-600)' }}>*</span>
             </label>
             <input
@@ -49,8 +49,8 @@ export default function ContactPage() {
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
           </div>
-          <div style={{ marginBottom: 'var(--space-4)' }}>
-            <label htmlFor="contact-email" style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 'var(--font-medium)', fontSize: 'var(--text-sm)' }}>
+          <div style={{ marginBottom: 'var(--space-3)' }}>
+            <label htmlFor="contact-email" style={{ display: 'block', marginBottom: 'var(--space-1)', fontWeight: 'var(--font-medium)', fontSize: 'var(--text-xs)' }}>
               Email <span style={{ color: 'var(--color-danger-600)' }}>*</span>
             </label>
             <input
@@ -62,8 +62,8 @@ export default function ContactPage() {
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             />
           </div>
-          <div style={{ marginBottom: 'var(--space-4)' }}>
-            <label htmlFor="contact-subject" style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 'var(--font-medium)', fontSize: 'var(--text-sm)' }}>
+          <div style={{ marginBottom: 'var(--space-3)' }}>
+            <label htmlFor="contact-subject" style={{ display: 'block', marginBottom: 'var(--space-1)', fontWeight: 'var(--font-medium)', fontSize: 'var(--text-xs)' }}>
               Subject <span style={{ color: 'var(--color-danger-600)' }}>*</span>
             </label>
             <input
@@ -75,14 +75,14 @@ export default function ContactPage() {
               onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
             />
           </div>
-          <div style={{ marginBottom: 'var(--space-6)' }}>
-            <label htmlFor="contact-message" style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 'var(--font-medium)', fontSize: 'var(--text-sm)' }}>
+          <div style={{ marginBottom: 'var(--space-4)' }}>
+            <label htmlFor="contact-message" style={{ display: 'block', marginBottom: 'var(--space-1)', fontWeight: 'var(--font-medium)', fontSize: 'var(--text-xs)' }}>
               Message <span style={{ color: 'var(--color-danger-600)' }}>*</span>
             </label>
             <textarea
               id="contact-message"
               required
-              rows={5}
+              rows={4}
               className="textarea"
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}

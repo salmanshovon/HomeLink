@@ -16,7 +16,7 @@ function preferredLabel(value) {
   return PREFERRED_TENANT_LABELS[value] || value
 }
 
-export function PropertyCard({ property }) {
+export function PropertyCard({ property, isOwner = false }) {
   // Search results are flat listings (PublicListingSerializer); property detail
   // pages pass a Property with a nested listings array. Normalise both shapes.
   const listing = Array.isArray(property.listings) ? property.listings[0] : property
@@ -74,7 +74,7 @@ export function PropertyCard({ property }) {
           </div>
         )}
 
-        {listing?.status && (
+        {isOwner && listing?.status && (
           <div style={{ position: 'absolute', top: 'var(--space-3)', left: 'var(--space-3)' }}>
             <Badge variant="success">{listing.status_display || 'Available'}</Badge>
           </div>

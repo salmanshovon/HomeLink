@@ -19,11 +19,12 @@ export default function AuthLayout() {
           style={{
             fontSize: 'var(--text-xl)',
             fontWeight: 'var(--font-bold)',
-            color: 'var(--color-brand-700)',
+            color: 'var(--color-neutral-900)',
             textDecoration: 'none',
             display: 'flex',
             alignItems: 'center',
             gap: 'var(--space-2)',
+            letterSpacing: '-0.025em',
           }}
         >
           <span
@@ -36,7 +37,8 @@ export default function AuthLayout() {
               background: 'var(--color-brand-600)',
               color: 'var(--color-neutral-0)',
               borderRadius: 'var(--radius-md)',
-              fontSize: '1rem',
+              fontSize: '0.875rem',
+              fontWeight: 'var(--font-bold)',
             }}
           >
             H

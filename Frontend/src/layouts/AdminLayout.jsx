@@ -1,5 +1,5 @@
 import { DashboardLayout } from '../components/layout/DashboardLayout.jsx'
-import { Home, Building, FileText, Users, ClipboardList, Calendar, CreditCard, MessageSquare, Bell, Shield, User } from 'lucide-react'
+import { Home, Building, FileText, Users, ClipboardList, Calendar, CreditCard, MessageSquare, Bell, Shield, User, Wrench } from 'lucide-react'
 
 const adminNav = [
   { to: '/admin', label: 'Overview', icon: <Home size={18} /> },
@@ -15,6 +15,7 @@ const adminNav = [
   { to: '/admin/commissions', label: 'Commissions', icon: <CreditCard size={18} /> },
   { to: '/admin/audit', label: 'Audit Logs', icon: <Shield size={18} /> },
   { to: '/admin/notifications', label: 'Notifications', icon: <Bell size={18} /> },
+  { to: '/admin/services', label: 'Service Requests', icon: <Wrench size={18} /> },
   { to: '/admin/profile', label: 'My Profile', icon: <User size={18} /> },
 ]
 

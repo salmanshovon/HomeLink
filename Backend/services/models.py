@@ -99,6 +99,8 @@ class ServiceRequest(TimeStampedModel):
     customer = models.ForeignKey(User, on_delete=models.PROTECT, related_name='service_requests')
     category = models.ForeignKey(ServiceCategory, on_delete=models.PROTECT, related_name='requests')
     property = models.ForeignKey('properties.Property', null=True, blank=True, on_delete=models.SET_NULL, related_name='service_requests')
+    contact_name = models.CharField(max_length=200, blank=True)
+    contact_phone = models.CharField(max_length=20, blank=True)
     service_address = models.TextField(blank=True)
     description = models.TextField()
     preferred_datetime = models.DateTimeField(null=True, blank=True)
@@ -118,6 +120,36 @@ class ServiceRequest(TimeStampedModel):
 
     def __str__(self):
         return f'service-request:{self.id}:{self.category_id}'
+
+
+class ServiceRequestHistory(TimeStampedModel):
+    """Immutable timeline of all events for a service request."""
+
+    class EventType(models.TextChoices):
+        STATUS_CHANGE = 'status_change', 'Status Change'
+        NOTE_ADDED = 'note_added', 'Note Added'
+        QUOTE_SUBMITTED = 'quote_submitted', 'Quote Submitted'
+        QUOTE_ACCEPTED = 'quote_accepted', 'Quote Accepted'
+        APPOINTMENT_SCHEDULED = 'appointment_scheduled', 'Appointment Scheduled'
+        APPOINTMENT_COMPLETED = 'appointment_completed', 'Appointment Completed'
+        PRICE_UPDATED = 'price_updated', 'Price Updated'
+        ASSIGNED = 'assigned', 'Assigned'
+        CREATED = 'created', 'Created'
+
+    service_request = models.ForeignKey(ServiceRequest, on_delete=models.CASCADE, related_name='history')
+    event_type = models.CharField(max_length=30, choices=EventType.choices)
+    actor = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='service_history_events')
+    from_status = models.CharField(max_length=20, blank=True)
+    to_status = models.CharField(max_length=20, blank=True)
+    notes = models.TextField(blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        ordering = ('-created_at',)
+        verbose_name_plural = 'service request histories'
+
+    def __str__(self):
+        return f'history:{self.service_request_id}:{self.event_type}'
 
 
 class AppointmentStatus(models.TextChoices):

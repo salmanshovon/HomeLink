@@ -15,7 +15,7 @@ export default function PublicLayout() {
         Skip to main content
       </a>
       <PublicHeader />
-      <main id="main-content" style={{ flex: 1 }}>
+      <main id="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Outlet />
       </main>
       <PublicFooter />

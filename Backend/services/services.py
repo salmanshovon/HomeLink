@@ -6,7 +6,8 @@ from .models import ServiceAppointment, ServiceQuote, ServiceRequest
 
 
 def create_service_request(customer, category, property=None, service_address='',
-                           description='', preferred_datetime=None, customer_notes=''):
+                           description='', preferred_datetime=None, customer_notes='',
+                           contact_name='', contact_phone=''):
     """Create a new service request for a customer.
 
     Args:
@@ -17,6 +18,8 @@ def create_service_request(customer, category, property=None, service_address=''
         description: Description of the issue/service needed.
         preferred_datetime: Optional preferred date/time for service.
         customer_notes: Optional notes from the customer.
+        contact_name: Optional override for contact name.
+        contact_phone: Optional override for contact phone.
 
     Returns:
         The created ServiceRequest instance.
@@ -30,6 +33,8 @@ def create_service_request(customer, category, property=None, service_address=''
             description=description,
             preferred_datetime=preferred_datetime,
             customer_notes=customer_notes,
+            contact_name=contact_name,
+            contact_phone=contact_phone,
         )
 
 

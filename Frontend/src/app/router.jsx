@@ -73,6 +73,7 @@ const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard.jsx'))
 const AdminUserListPage = lazy(() => import('../pages/admin/AdminUserListPage.jsx'))
 const AdminUserDetailPage = lazy(() => import('../pages/admin/AdminUserDetailPage.jsx'))
 const AdminCreateEmployeePage = lazy(() => import('../pages/admin/AdminCreateEmployeePage.jsx'))
+const AdminServiceManagement = lazy(() => import('../pages/admin/AdminServiceManagement.jsx'))
 
 // Profile pages
 const ProfilePage = lazy(() => import('../pages/profile/ProfilePage.jsx'))
@@ -81,6 +82,7 @@ const ProfilePage = lazy(() => import('../pages/profile/ProfilePage.jsx'))
 const ServiceCategories = lazy(() => import('../pages/services/ServiceCategories.jsx'))
 const ServiceRequestForm = lazy(() => import('../pages/services/ServiceRequestForm.jsx'))
 const ServiceRequests = lazy(() => import('../pages/services/ServiceRequests.jsx'))
+const ServiceRequestHistory = lazy(() => import('../pages/services/ServiceRequestHistory.jsx'))
 
 // Route guards
 const ProtectedRoute = lazy(() => import('../routes/ProtectedRoute.jsx'))
@@ -142,6 +144,11 @@ export function AppRouter() {
         { path: 'messages', element: <TenantMessages /> },
         { path: 'notifications', element: <TenantNotifications /> },
         { path: 'profile', element: <ProfilePage /> },
+        { path: 'services', element: <ServiceCategories /> },
+        { path: 'services/categories', element: <ServiceCategories /> },
+        { path: 'services/requests', element: <ServiceRequests /> },
+        { path: 'services/requests/:requestId', element: <ServiceRequestHistory /> },
+        { path: 'services/request', element: <ServiceRequestForm /> },
       ],
     },
     {
@@ -164,6 +171,11 @@ export function AppRouter() {
         { path: 'messages', element: <LandlordMessages /> },
         { path: 'notifications', element: <LandlordOverview /> },
         { path: 'profile', element: <ProfilePage /> },
+        { path: 'services', element: <ServiceCategories /> },
+        { path: 'services/categories', element: <ServiceCategories /> },
+        { path: 'services/requests', element: <ServiceRequests /> },
+        { path: 'services/requests/:requestId', element: <ServiceRequestHistory /> },
+        { path: 'services/request', element: <ServiceRequestForm /> },
       ],
     },
     {
@@ -186,7 +198,10 @@ export function AppRouter() {
         { path: 'billing', element: <EmployeeOverview /> },
         { path: 'messages', element: <EmployeeOverview /> },
         { path: 'notifications', element: <EmployeeOverview /> },
+        { path: 'services', element: <AdminServiceManagement /> },
         { path: 'profile', element: <ProfilePage /> },
+        { path: 'services/requests', element: <ServiceRequests /> },
+        { path: 'services/requests/:requestId', element: <ServiceRequestHistory /> },
       ],
     },
     {
@@ -203,6 +218,8 @@ export function AppRouter() {
         { path: 'users', element: <AdminUserListPage /> },
         { path: 'users/create-employee', element: <AdminCreateEmployeePage /> },
         { path: 'users/:userId', element: <AdminUserDetailPage /> },
+        { path: 'services', element: <AdminServiceManagement /> },
+        { path: 'services/requests/:requestId', element: <ServiceRequestHistory /> },
         { path: 'properties', element: <EmployeeProperties /> },
         { path: 'listings', element: <EmployeeListings /> },
         { path: 'leads', element: <EmployeeOverview /> },
@@ -214,32 +231,13 @@ export function AppRouter() {
         { path: 'audit', element: <EmployeeOverview /> },
         { path: 'notifications', element: <EmployeeOverview /> },
         { path: 'profile', element: <ProfilePage /> },
+        { path: 'services/requests', element: <ServiceRequests /> },
+        { path: 'services/requests/:requestId', element: <ServiceRequestHistory /> },
+        { path: 'services/categories', element: <ServiceCategories /> },
+        { path: 'services/request', element: <ServiceRequestForm /> },
       ],
     },
-    {
-      path: '/services',
-      element: (
-        <ProtectedRoute>
-          <ServiceCategories />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: '/services/requests',
-      element: (
-        <ProtectedRoute>
-          <ServiceRequests />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: '/services/request',
-      element: (
-        <ProtectedRoute>
-          <ServiceRequestForm />
-        </ProtectedRoute>
-      ),
-    },
+
     { path: '/access-denied', element: <AccessDeniedPage /> },
     { path: '*', element: <NotFoundPage /> },
       ],

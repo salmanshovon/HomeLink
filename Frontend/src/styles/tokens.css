@@ -19,17 +19,17 @@
 
   /* ----- Neutral palette ----- */
   --color-neutral-0: #ffffff;
-  --color-neutral-50: #f8f9fa;
-  --color-neutral-100: #f1f3f4;
-  --color-neutral-200: #e8eaed;
-  --color-neutral-300: #d2d6da;
-  --color-neutral-400: #9aa0a6;
+  --color-neutral-50: #f9fafb;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-400: #9ca3af;
   --color-neutral-500: #6b7280;
   --color-neutral-600: #4b5563;
   --color-neutral-700: #374151;
   --color-neutral-800: #1f2937;
   --color-neutral-900: #111827;
-  --color-neutral-950: #0b1220;
+  --color-neutral-950: #030712;
 
   /* ----- Semantic colors ----- */
   --color-success-50: #ecfdf5;
@@ -65,6 +65,7 @@
   --text-3xl: 1.875rem;
   --text-4xl: 2.25rem;
   --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
 
   --leading-tight: 1.25;
   --leading-snug: 1.375;

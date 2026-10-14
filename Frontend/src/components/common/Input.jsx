@@ -10,15 +10,15 @@ export const Input = forwardRef(function Input(
   const hintId = `${inputId}-hint`
 
   return (
-    <div className="form-field" style={{ marginBottom: 'var(--space-4)' }}>
+    <div className="form-field" style={{ marginBottom: 'var(--space-3)' }}>
       {label && (
         <label
           htmlFor={inputId}
           style={{
             display: 'block',
-            marginBottom: 'var(--space-2)',
+            marginBottom: 'var(--space-1)',
             fontWeight: 'var(--font-medium)',
-            fontSize: 'var(--text-sm)',
+            fontSize: 'var(--text-xs)',
           }}
         >
           {label}
@@ -42,7 +42,7 @@ export const Input = forwardRef(function Input(
           role="alert"
           style={{
             marginTop: 'var(--space-1)',
-            fontSize: 'var(--text-sm)',
+            fontSize: 'var(--text-xs)',
             color: 'var(--color-danger-600)',
           }}
         >
@@ -54,7 +54,7 @@ export const Input = forwardRef(function Input(
           id={hintId}
           style={{
             marginTop: 'var(--space-1)',
-            fontSize: 'var(--text-sm)',
+            fontSize: 'var(--text-xs)',
             color: 'var(--color-neutral-500)',
           }}
         >

@@ -38,7 +38,7 @@ export function PublicFooter() {
   return (
     <footer
       style={{
-        borderTop: '1px solid var(--border-color)',
+        borderTop: '1px solid var(--color-neutral-200)',
         background: 'var(--color-neutral-50)',
         marginTop: 'auto',
       }}
@@ -57,10 +57,11 @@ export function PublicFooter() {
               <h6
                 style={{
                   marginBottom: 'var(--space-4)',
-                  fontSize: 'var(--text-sm)',
+                  fontSize: 'var(--text-xs)',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
+                  letterSpacing: '0.08em',
                   color: 'var(--color-neutral-500)',
+                  fontWeight: 'var(--font-semibold)',
                 }}
               >
                 {section.title}
@@ -86,7 +87,7 @@ export function PublicFooter() {
         </div>
         <div
           style={{
-            borderTop: '1px solid var(--border-color)',
+            borderTop: '1px solid var(--color-neutral-200)',
             paddingTop: 'var(--space-6)',
             display: 'flex',
             justifyContent: 'space-between',

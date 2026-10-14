@@ -1,5 +1,5 @@
 import { DashboardLayout } from '../components/layout/DashboardLayout.jsx'
-import { Home, Bookmark, FileText, Calendar, CreditCard, MessageSquare, Bell, Wrench, User } from 'lucide-react'
+import { Home, Bookmark, FileText, Calendar, CreditCard, MessageSquare, Bell, Wrench, User, Settings } from 'lucide-react'
 
 const tenantNav = [
   { to: '/tenant', label: 'Overview', icon: <Home size={18} /> },
@@ -11,6 +11,7 @@ const tenantNav = [
   { to: '/tenant/complaints', label: 'Complaints', icon: <Wrench size={18} /> },
   { to: '/tenant/messages', label: 'Messages', icon: <MessageSquare size={18} /> },
   { to: '/tenant/notifications', label: 'Notifications', icon: <Bell size={18} /> },
+  { to: '/tenant/services/categories', label: 'Request Service', icon: <Settings size={18} /> },
   { to: '/tenant/profile', label: 'My Profile', icon: <User size={18} /> },
 ]
 

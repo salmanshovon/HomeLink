@@ -7,7 +7,7 @@ export function DashboardLayout({ title, navLinks }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-neutral-50)' }}>
       <DashboardHeader menuOpen={sidebarOpen} onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
       <div style={{ display: 'flex', flex: 1 }}>
         {/* Desktop sidebar */}
@@ -20,7 +20,8 @@ export function DashboardLayout({ title, navLinks }) {
               position: 'fixed',
               inset: 0,
               zIndex: 'var(--z-overlay)',
-              background: 'rgb(0 0 0 / 0.5)',
+              background: 'rgb(0 0 0 / 0.4)',
+              backdropFilter: 'blur(2px)',
             }}
             onClick={() => setSidebarOpen(false)}
           >
@@ -32,7 +33,7 @@ export function DashboardLayout({ title, navLinks }) {
                 top: 0,
                 bottom: 0,
                 width: 'var(--sidebar-width)',
-                background: 'var(--color-neutral-0)',
+                background: 'var(--color-neutral-900)',
               }}
             >
               <DashboardSidebar title={title} links={navLinks} onNavigate={() => setSidebarOpen(false)} />
@@ -40,7 +41,7 @@ export function DashboardLayout({ title, navLinks }) {
           </div>
         )}
 
-        <main style={{ flex: 1, padding: 'var(--space-8)', overflowX: 'auto' }}>
+        <main style={{ flex: 1, padding: 'var(--space-6)', overflowX: 'auto', minWidth: 0 }}>
           <Outlet />
         </main>
       </div>

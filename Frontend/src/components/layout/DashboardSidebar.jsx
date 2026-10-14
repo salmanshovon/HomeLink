@@ -5,8 +5,8 @@ export function DashboardSidebar({ title, links, onNavigate }) {
     <aside
       style={{
         width: 'var(--sidebar-width)',
-        borderRight: '1px solid var(--border-color)',
-        background: 'var(--color-neutral-0)',
+        borderRight: '1px solid var(--color-neutral-800)',
+        background: 'var(--color-neutral-900)',
         padding: 'var(--space-6)',
         position: 'sticky',
         top: 'var(--header-height)',
@@ -18,11 +18,12 @@ export function DashboardSidebar({ title, links, onNavigate }) {
     >
       <h3
         style={{
-          fontSize: 'var(--text-sm)',
+          fontSize: 'var(--text-xs)',
           textTransform: 'uppercase',
-          letterSpacing: '0.05em',
+          letterSpacing: '0.08em',
           color: 'var(--color-neutral-500)',
           marginBottom: 'var(--space-4)',
+          fontWeight: 'var(--font-semibold)',
         }}
       >
         {title}
@@ -32,6 +33,7 @@ export function DashboardSidebar({ title, links, onNavigate }) {
           <NavLink
             key={link.to}
             to={link.to}
+            end
             onClick={onNavigate}
             style={({ isActive }) => ({
               display: 'flex',
@@ -42,8 +44,9 @@ export function DashboardSidebar({ title, links, onNavigate }) {
               fontSize: 'var(--text-sm)',
               fontWeight: 'var(--font-medium)',
               textDecoration: 'none',
-              color: isActive ? 'var(--color-brand-700)' : 'var(--color-neutral-600)',
-              background: isActive ? 'var(--color-brand-50)' : 'transparent',
+              color: isActive ? 'var(--color-neutral-0)' : 'var(--color-neutral-400)',
+              background: isActive ? 'var(--color-brand-600)' : 'transparent',
+              transition: 'all var(--transition-fast)',
             })}
           >
             {link.icon && <span style={{ display: 'flex', alignItems: 'center' }}>{link.icon}</span>}

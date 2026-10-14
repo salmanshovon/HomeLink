@@ -10,15 +10,15 @@ export const Textarea = forwardRef(function Textarea(
   const hintId = `${textareaId}-hint`
 
   return (
-    <div className="form-field" style={{ marginBottom: 'var(--space-4)' }}>
+    <div className="form-field" style={{ marginBottom: 'var(--space-3)' }}>
       {label && (
         <label
           htmlFor={textareaId}
           style={{
             display: 'block',
-            marginBottom: 'var(--space-2)',
+            marginBottom: 'var(--space-1)',
             fontWeight: 'var(--font-medium)',
-            fontSize: 'var(--text-sm)',
+            fontSize: 'var(--text-xs)',
           }}
         >
           {label}
@@ -43,7 +43,7 @@ export const Textarea = forwardRef(function Textarea(
           role="alert"
           style={{
             marginTop: 'var(--space-1)',
-            fontSize: 'var(--text-sm)',
+            fontSize: 'var(--text-xs)',
             color: 'var(--color-danger-600)',
           }}
         >
@@ -55,7 +55,7 @@ export const Textarea = forwardRef(function Textarea(
           id={hintId}
           style={{
             marginTop: 'var(--space-1)',
-            fontSize: 'var(--text-sm)',
+            fontSize: 'var(--text-xs)',
             color: 'var(--color-neutral-500)',
           }}
         >

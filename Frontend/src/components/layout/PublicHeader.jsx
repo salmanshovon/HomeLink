@@ -28,8 +28,9 @@ export function PublicHeader() {
         top: 0,
         zIndex: 'var(--z-sticky)',
         background: 'var(--color-neutral-0)',
-        borderBottom: '1px solid var(--border-color)',
+        borderBottom: '1px solid var(--color-neutral-200)',
         height: 'var(--header-height)',
+        boxShadow: 'var(--shadow-sm)',
       }}
     >
       <div
@@ -46,11 +47,12 @@ export function PublicHeader() {
           style={{
             fontSize: 'var(--text-xl)',
             fontWeight: 'var(--font-bold)',
-            color: 'var(--color-brand-700)',
+            color: 'var(--color-neutral-900)',
             textDecoration: 'none',
             display: 'flex',
             alignItems: 'center',
             gap: 'var(--space-2)',
+            letterSpacing: '-0.025em',
           }}
         >
           <span
@@ -63,7 +65,8 @@ export function PublicHeader() {
               background: 'var(--color-brand-600)',
               color: 'var(--color-neutral-0)',
               borderRadius: 'var(--radius-md)',
-              fontSize: '1rem',
+              fontSize: '0.875rem',
+              fontWeight: 'var(--font-bold)',
             }}
           >
             H
@@ -74,7 +77,7 @@ export function PublicHeader() {
         {/* Desktop navigation */}
         <nav
           aria-label="Main navigation"
-          style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-6)' }}
+          style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-8)' }}
           className="desktop-nav"
         >
           {navLinks.map((link) => (
@@ -83,7 +86,7 @@ export function PublicHeader() {
               to={link.to}
               style={{
                 fontWeight: 'var(--font-medium)',
-                color: 'var(--color-neutral-700)',
+                color: 'var(--color-neutral-600)',
                 textDecoration: 'none',
                 fontSize: 'var(--text-sm)',
               }}
@@ -105,7 +108,7 @@ export function PublicHeader() {
                 to="/auth/login"
                 style={{
                   fontWeight: 'var(--font-semibold)',
-                  color: 'var(--color-brand-700)',
+                  color: 'var(--color-neutral-700)',
                   fontSize: 'var(--text-sm)',
                 }}
               >
@@ -134,10 +137,10 @@ export function PublicHeader() {
             border: 'none',
             cursor: 'pointer',
             padding: 'var(--space-2)',
-            color: 'var(--color-neutral-700)',
+            color: 'var(--color-neutral-600)',
           }}
         >
-          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
 
@@ -151,7 +154,7 @@ export function PublicHeader() {
             left: 0,
             right: 0,
             background: 'var(--color-neutral-0)',
-            borderBottom: '1px solid var(--border-color)',
+            borderBottom: '1px solid var(--color-neutral-200)',
             padding: 'var(--space-4)',
             display: 'flex',
             flexDirection: 'column',
@@ -186,14 +189,14 @@ export function PublicHeader() {
             </Link>
           ) : (
             <>
-              <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: 'var(--space-2) 0' }} />
+              <hr style={{ border: 'none', borderTop: '1px solid var(--color-neutral-200)', margin: 'var(--space-2) 0' }} />
               <Link
                 to="/auth/login"
                 onClick={() => setMobileOpen(false)}
                 style={{
                   padding: 'var(--space-3)',
                   fontWeight: 'var(--font-semibold)',
-                  color: 'var(--color-brand-700)',
+                  color: 'var(--color-neutral-700)',
                   textDecoration: 'none',
                 }}
               >
