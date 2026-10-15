@@ -268,74 +268,6 @@ export default function HomePage() {
       </div>
     </section>
 
-      {/* How It Works */}
-      <section
-        style={{
-          padding: 'var(--space-24) 0',
-          background: 'linear-gradient(180deg, #f8f9fa 0%, #e8f4fd 50%, #f0f9ff 100%)',
-        }}
-        data-section="how-it-works"
-        ref={(el) => (sectionRefs.current[0] = el)}
-      >
-        <div style={{ padding: '0 var(--space-8)' }}>
-          <h2
-            className={`animate-on-scroll ${sectionVisible('how-it-works') ? 'is-visible' : ''}`}
-            style={{ textAlign: 'center', marginBottom: 'var(--space-12)', ['--anim-name']: 'homeFadeUp' }}
-          >
-            How HomeLink Works
-          </h2>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: 'var(--space-8)',
-            }}
-          >
-            {cardSteps.map((step, i) => (
-              <div
-                key={step.title}
-                className={`card animate-on-scroll ${sectionVisible('how-it-works') ? 'is-visible' : ''}`}
-                style={{
-                  textAlign: 'center',
-                  padding: 'var(--space-8)',
-                  animationDelay: animDelay(i),
-                  ['--anim-name']: ANIMATION_STYLES[i % ANIMATION_STYLES.length].keyframes,
-                  border: '2px solid transparent',
-                  background: `linear-gradient(var(--color-neutral-0), var(--color-neutral-0)) padding-box, linear-gradient(135deg, ${['#ff6b6b', '#48dbfb', '#ff9ff3'][i % 3]}, ${['#feca57', '#5f27cd', '#f368e0'][i % 3]}) border-box`,
-                  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-8px)'
-                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.1)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = ''
-                  e.currentTarget.style.boxShadow = ''
-                }}
-              >
-                <div
-                  style={{
-                    width: '4rem',
-                    height: '4rem',
-                    borderRadius: '50%',
-                    background: `linear-gradient(135deg, ${['#ff6b6b', '#48dbfb', '#ff9ff3'][i % 3]}, ${['#feca57', '#5f27cd', '#f368e0'][i % 3]})`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0 auto var(--space-4)',
-                    color: '#fff',
-                  }}
-                >
-                  {step.icon}
-                </div>
-                <h3 style={{ fontSize: 'var(--text-xl)' }}>{step.title}</h3>
-                <p style={{ color: 'var(--color-neutral-600)' }}>{step.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Combined CTA Section */}
       <section
         data-section="cta"
@@ -538,6 +470,74 @@ export default function HomePage() {
             <Link to="/maintenance-services" className="btn btn-outline" style={{ textDecoration: 'none' }}>
               View All Services
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section
+        style={{
+          padding: 'var(--space-24) 0',
+          background: 'linear-gradient(180deg, #f8f9fa 0%, #e8f4fd 50%, #f0f9ff 100%)',
+        }}
+        data-section="how-it-works"
+        ref={(el) => (sectionRefs.current[0] = el)}
+      >
+        <div style={{ padding: '0 var(--space-8)' }}>
+          <h2
+            className={`animate-on-scroll ${sectionVisible('how-it-works') ? 'is-visible' : ''}`}
+            style={{ textAlign: 'center', marginBottom: 'var(--space-12)', ['--anim-name']: 'homeFadeUp' }}
+          >
+            How HomeLink Works
+          </h2>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: 'var(--space-8)',
+            }}
+          >
+            {cardSteps.map((step, i) => (
+              <div
+                key={step.title}
+                className={`card animate-on-scroll ${sectionVisible('how-it-works') ? 'is-visible' : ''}`}
+                style={{
+                  textAlign: 'center',
+                  padding: 'var(--space-8)',
+                  animationDelay: animDelay(i),
+                  ['--anim-name']: ANIMATION_STYLES[i % ANIMATION_STYLES.length].keyframes,
+                  border: '2px solid transparent',
+                  background: `linear-gradient(var(--color-neutral-0), var(--color-neutral-0)) padding-box, linear-gradient(135deg, ${['#ff6b6b', '#48dbfb', '#ff9ff3'][i % 3]}, ${['#feca57', '#5f27cd', '#f368e0'][i % 3]}) border-box`,
+                  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-8px)'
+                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.1)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = ''
+                  e.currentTarget.style.boxShadow = ''
+                }}
+              >
+                <div
+                  style={{
+                    width: '4rem',
+                    height: '4rem',
+                    borderRadius: '50%',
+                    background: `linear-gradient(135deg, ${['#ff6b6b', '#48dbfb', '#ff9ff3'][i % 3]}, ${['#feca57', '#5f27cd', '#f368e0'][i % 3]})`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto var(--space-4)',
+                    color: '#fff',
+                  }}
+                >
+                  {step.icon}
+                </div>
+                <h3 style={{ fontSize: 'var(--text-xl)' }}>{step.title}</h3>
+                <p style={{ color: 'var(--color-neutral-600)' }}>{step.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
