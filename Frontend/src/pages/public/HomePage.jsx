@@ -107,6 +107,7 @@ export default function HomePage() {
     <div style={{ width: '100%' }}>
       {/* Hero Section */}
       <section
+        className="hero-section"
         style={{
           background: 'linear-gradient(135deg, #e8f5e9 0%, #f3e5f5 25%, #e3f2fd 50%, #fff3e0 75%, #fce4ec 100%)',
           padding: 'var(--space-24) 0',
@@ -122,17 +123,10 @@ export default function HomePage() {
         <div style={{ position: 'absolute', bottom: '25%', right: '25%', width: '60px', height: '60px', borderRadius: '50%', background: 'linear-gradient(135deg, #48dbfb, #0abde3)', opacity: 0.12, filter: 'blur(20px)' }} />
         <div style={{ position: 'absolute', top: '15%', left: '40%', width: '200px', height: '4px', borderRadius: '4px', background: 'linear-gradient(90deg, transparent, #ff6b6b, #feca57, #48dbfb, #ff9ff3, transparent)', opacity: 0.4 }} />
         <div style={{ position: 'absolute', bottom: '20%', left: '30%', width: '160px', height: '4px', borderRadius: '4px', background: 'linear-gradient(90deg, transparent, #5f27cd, #341f97, #00d2d3, transparent)', opacity: 0.3 }} />
-        {/* Splash Phase */}
+        {/* Splash overlay covers the whole hero, so the photo and the copy both
+            sit behind the logo until it clears. */}
         {phase === 'splash' && (
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
+          <div className="hero-splash-overlay">
             <div className="home-splash">
               <div className="home-splash-icon">
                 <Home size={64} />
@@ -159,49 +153,69 @@ export default function HomePage() {
           />
         )}
 
-        {/* Banner + Search */}
-        <div style={{ textAlign: 'center', padding: '0 var(--space-8)', position: 'relative' }}>
-          <h1
-            className={phase === 'banner' || phase === 'done' ? 'home-appear' : 'home-hidden'}
-            style={{
-              fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-              marginBottom: 'var(--space-6)',
-              maxWidth: '800px',
-              marginLeft: 'auto',
-              marginRight: 'auto',
-            }}
-          >
-            Find Your Next Home in Bangladesh
-          </h1>
-          <p
-            className={phase === 'banner' || phase === 'done' ? 'home-appear' : 'home-hidden'}
-            style={{
-              fontSize: 'var(--text-lg)',
-              color: 'var(--color-neutral-600)',
-              maxWidth: '600px',
-              margin: '0 auto var(--space-10)',
-            }}
-          >
-            HomeLink connects verified landlords with trustworthy tenants. Browse listings,
-            request viewings, and manage your rental — all in one place.
-          </p>
+        {/* Hero content: image left, text+search right */}
+        <div className="hero-content">
+          <div className="hero-image-half" style={{ ['--anim-name']: animName }}>
+            {phase === 'banner' || phase === 'done' ? (
+              <div className="hero-image-frame">
+                <img src="/hero_sec.png" alt="HomeLink hero" className="hero-image home-appear" />
+                <div className="hero-image-overlay" />
+              </div>
+            ) : null}
+          </div>
 
-          {/* Search Bar */}
-          <form
-            onSubmit={handleSearch}
-            className={phase === 'banner' || phase === 'done' ? 'home-appear' : 'home-hidden'}
-            style={{
-              display: 'flex',
-              gap: 'var(--space-3)',
-              maxWidth: '800px',
-              margin: '0 auto',
-              background: 'var(--color-neutral-0)',
-              padding: 'var(--space-4)',
-              borderRadius: 'var(--radius-2xl)',
-              boxShadow: 'var(--shadow-lg)',
-              flexWrap: 'wrap',
-            }}
-          >
+          {/* Creative divider */}
+          <div className="hero-divider">
+            <div className="hero-divider-line" />
+            <div className="hero-divider-dots">
+              <div className="hero-divider-dot" />
+              <div className="hero-divider-dot" />
+              <div className="hero-divider-dot" />
+            </div>
+          </div>
+
+          <div className="hero-text-half" style={{ ['--anim-name']: animName }}>
+            <h1
+              className={phase === 'banner' || phase === 'done' ? 'home-appear' : 'home-hidden'}
+              style={{
+                fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+                marginBottom: 'var(--space-6)',
+                maxWidth: '800px',
+                marginLeft: 'auto',
+                marginRight: 'auto',
+              }}
+            >
+              Find Your Next Home in Bangladesh
+            </h1>
+            <p
+              className={phase === 'banner' || phase === 'done' ? 'home-appear' : 'home-hidden'}
+              style={{
+                fontSize: 'var(--text-lg)',
+                color: 'var(--color-neutral-600)',
+                maxWidth: '600px',
+                margin: '0 auto var(--space-10)',
+              }}
+            >
+              HomeLink connects verified landlords with trustworthy tenants. Browse listings,
+              request viewings, and manage your rental — all in one place.
+            </p>
+
+            {/* Search Bar */}
+            <form
+              onSubmit={handleSearch}
+              className={phase === 'banner' || phase === 'done' ? 'home-appear' : 'home-hidden'}
+              style={{
+                display: 'flex',
+                gap: 'var(--space-3)',
+                maxWidth: '800px',
+                margin: '0 auto',
+                background: 'var(--color-neutral-0)',
+                padding: 'var(--space-4)',
+                borderRadius: 'var(--radius-2xl)',
+                boxShadow: 'var(--shadow-lg)',
+                flexWrap: 'wrap',
+              }}
+            >
             <div style={{ flex: '1 1 200px', position: 'relative' }}>
               <MapPin
                 size={18}
@@ -251,7 +265,8 @@ export default function HomePage() {
             </button>
           </form>
         </div>
-      </section>
+      </div>
+    </section>
 
       {/* How It Works */}
       <section
