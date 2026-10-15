@@ -1,7 +1,21 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { Search, MapPin, Home, Shield, Wrench, ArrowRight } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext.jsx'
+
+const ANIMATION_STYLES = [
+  { name: 'fade-up', keyframes: 'homeFadeUp' },
+  { name: 'fade-down', keyframes: 'homeFadeDown' },
+  { name: 'fade-left', keyframes: 'homeFadeLeft' },
+  { name: 'fade-right', keyframes: 'homeFadeRight' },
+  { name: 'zoom-in', keyframes: 'homeZoomIn' },
+  { name: 'slide-up', keyframes: 'homeSlideUp' },
+]
+
+function getRandomAnimation() {
+  const idx = Math.floor(Math.random() * ANIMATION_STYLES.length)
+  return ANIMATION_STYLES[idx]
+}
 
 export default function HomePage() {
   const navigate = useNavigate()
@@ -9,6 +23,43 @@ export default function HomePage() {
   const [searchArea, setSearchArea] = useState('')
   const [searchRent, setSearchRent] = useState('')
   const [searchBedrooms, setSearchBedrooms] = useState('')
+  const [animStyle, setAnimStyle] = useState(null)
+  const [phase, setPhase] = useState('splash')
+  const [visible, setVisible] = useState({})
+  const sectionRefs = useRef([])
+
+  useEffect(() => {
+    setAnimStyle(getRandomAnimation())
+  }, [])
+
+  useEffect(() => {
+    const timers = [
+      setTimeout(() => setPhase('transition'), 1200),
+      setTimeout(() => setPhase('banner'), 1800),
+      setTimeout(() => setPhase('done'), 2500),
+    ]
+    return () => timers.forEach(clearTimeout)
+  }, [])
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisible((prev) => ({ ...prev, [entry.target.dataset.section]: true }))
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      { threshold: 0.15 }
+    )
+
+    sectionRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref)
+    })
+
+    return () => observer.disconnect()
+  }, [])
 
   if (!isLoading && isAuthenticated) {
     const roles = (user?.roles || []).map((r) => r.toUpperCase())
@@ -27,17 +78,91 @@ export default function HomePage() {
     navigate(`/search?${params.toString()}`)
   }
 
+  const animName = animStyle?.keyframes || 'homeFadeUp'
+  const animDelay = (i) => `${i * 0.12}s`
+
+  const sectionVisible = (name) => visible[name]
+
+  const cardSteps = [
+    {
+      icon: <Search size={32} />,
+      title: 'Search & Discover',
+      description: 'Browse verified listings across Bangladesh. Filter by location, rent, bedrooms, and amenities to find your perfect match.',
+    },
+    {
+      icon: <Home size={32} />,
+      title: 'Request Viewings',
+      description: 'Found a place you love? Request a viewing appointment and our team will coordinate with the landlord for you.',
+    },
+    {
+      icon: <Shield size={32} />,
+      title: 'Secure & Verified',
+      description: 'All landlords are verified by our team. We handle the paperwork, agreements, and ensure a smooth rental experience.',
+    },
+  ]
+
+  const services = ['PABX Systems', 'CCTV Installation', 'TV Servicing', 'AC Repair', 'Refrigerator Repair']
+
   return (
     <div style={{ width: '100%' }}>
       {/* Hero Section */}
       <section
         style={{
-          background: 'linear-gradient(135deg, var(--color-brand-50) 0%, var(--color-neutral-0) 100%)',
+          background: 'linear-gradient(135deg, #e8f5e9 0%, #f3e5f5 25%, #e3f2fd 50%, #fff3e0 75%, #fce4ec 100%)',
           padding: 'var(--space-24) 0',
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        <div style={{ textAlign: 'center', padding: '0 var(--space-8)' }}>
+        {/* Decorative floating shapes */}
+        <div style={{ position: 'absolute', top: '10%', left: '5%', width: '120px', height: '120px', borderRadius: '50%', background: 'linear-gradient(135deg, #ff6b6b, #feca57)', opacity: 0.15, filter: 'blur(40px)' }} />
+        <div style={{ position: 'absolute', top: '60%', right: '8%', width: '180px', height: '180px', borderRadius: '50%', background: 'linear-gradient(135deg, #5f27cd, #341f97)', opacity: 0.12, filter: 'blur(50px)' }} />
+        <div style={{ position: 'absolute', bottom: '15%', left: '15%', width: '100px', height: '100px', borderRadius: '30%', background: 'linear-gradient(135deg, #00d2d3, #54a0ff)', opacity: 0.1, filter: 'blur(30px)' }} />
+        <div style={{ position: 'absolute', top: '30%', left: '70%', width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, #ff9ff3, #f368e0)', opacity: 0.15, filter: 'blur(25px)' }} />
+        <div style={{ position: 'absolute', bottom: '25%', right: '25%', width: '60px', height: '60px', borderRadius: '50%', background: 'linear-gradient(135deg, #48dbfb, #0abde3)', opacity: 0.12, filter: 'blur(20px)' }} />
+        <div style={{ position: 'absolute', top: '15%', left: '40%', width: '200px', height: '4px', borderRadius: '4px', background: 'linear-gradient(90deg, transparent, #ff6b6b, #feca57, #48dbfb, #ff9ff3, transparent)', opacity: 0.4 }} />
+        <div style={{ position: 'absolute', bottom: '20%', left: '30%', width: '160px', height: '4px', borderRadius: '4px', background: 'linear-gradient(90deg, transparent, #5f27cd, #341f97, #00d2d3, transparent)', opacity: 0.3 }} />
+        {/* Splash Phase */}
+        {phase === 'splash' && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <div className="home-splash">
+              <div className="home-splash-icon">
+                <Home size={64} />
+              </div>
+              <div className="home-splash-particles">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="home-splash-particle" style={{ '--i': i }} />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Transition flash */}
+        {phase === 'transition' && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'var(--color-brand-600)',
+              opacity: 0.15,
+            }}
+            className="home-flash"
+          />
+        )}
+
+        {/* Banner + Search */}
+        <div style={{ textAlign: 'center', padding: '0 var(--space-8)', position: 'relative' }}>
           <h1
+            className={phase === 'banner' || phase === 'done' ? 'home-appear' : 'home-hidden'}
             style={{
               fontSize: 'clamp(2rem, 5vw, 3.5rem)',
               marginBottom: 'var(--space-6)',
@@ -49,6 +174,7 @@ export default function HomePage() {
             Find Your Next Home in Bangladesh
           </h1>
           <p
+            className={phase === 'banner' || phase === 'done' ? 'home-appear' : 'home-hidden'}
             style={{
               fontSize: 'var(--text-lg)',
               color: 'var(--color-neutral-600)',
@@ -63,6 +189,7 @@ export default function HomePage() {
           {/* Search Bar */}
           <form
             onSubmit={handleSearch}
+            className={phase === 'banner' || phase === 'done' ? 'home-appear' : 'home-hidden'}
             style={{
               display: 'flex',
               gap: 'var(--space-3)',
@@ -127,9 +254,19 @@ export default function HomePage() {
       </section>
 
       {/* How It Works */}
-      <section style={{ padding: 'var(--space-24) 0' }}>
+      <section
+        style={{
+          padding: 'var(--space-24) 0',
+          background: 'linear-gradient(180deg, #f8f9fa 0%, #e8f4fd 50%, #f0f9ff 100%)',
+        }}
+        data-section="how-it-works"
+        ref={(el) => (sectionRefs.current[0] = el)}
+      >
         <div style={{ padding: '0 var(--space-8)' }}>
-          <h2 style={{ textAlign: 'center', marginBottom: 'var(--space-12)' }}>
+          <h2
+            className={`animate-on-scroll ${sectionVisible('how-it-works') ? 'is-visible' : ''}`}
+            style={{ textAlign: 'center', marginBottom: 'var(--space-12)', ['--anim-name']: 'homeFadeUp' }}
+          >
             How HomeLink Works
           </h2>
           <div
@@ -139,39 +276,39 @@ export default function HomePage() {
               gap: 'var(--space-8)',
             }}
           >
-            {[
-              {
-                icon: <Search size={32} />,
-                title: 'Search & Discover',
-                description: 'Browse verified listings across Bangladesh. Filter by location, rent, bedrooms, and amenities to find your perfect match.',
-              },
-              {
-                icon: <Home size={32} />,
-                title: 'Request Viewings',
-                description: 'Found a place you love? Request a viewing appointment and our team will coordinate with the landlord for you.',
-              },
-              {
-                icon: <Shield size={32} />,
-                title: 'Secure & Verified',
-                description: 'All landlords are verified by our team. We handle the paperwork, agreements, and ensure a smooth rental experience.',
-              },
-            ].map((step, i) => (
+            {cardSteps.map((step, i) => (
               <div
                 key={step.title}
-                className="card"
-                style={{ textAlign: 'center', padding: 'var(--space-8)' }}
+                className={`card animate-on-scroll ${sectionVisible('how-it-works') ? 'is-visible' : ''}`}
+                style={{
+                  textAlign: 'center',
+                  padding: 'var(--space-8)',
+                  animationDelay: animDelay(i),
+                  ['--anim-name']: ANIMATION_STYLES[i % ANIMATION_STYLES.length].keyframes,
+                  border: '2px solid transparent',
+                  background: `linear-gradient(var(--color-neutral-0), var(--color-neutral-0)) padding-box, linear-gradient(135deg, ${['#ff6b6b', '#48dbfb', '#ff9ff3'][i % 3]}, ${['#feca57', '#5f27cd', '#f368e0'][i % 3]}) border-box`,
+                  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-8px)'
+                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.1)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = ''
+                  e.currentTarget.style.boxShadow = ''
+                }}
               >
                 <div
                   style={{
                     width: '4rem',
                     height: '4rem',
                     borderRadius: '50%',
-                    background: 'var(--color-brand-50)',
+                    background: `linear-gradient(135deg, ${['#ff6b6b', '#48dbfb', '#ff9ff3'][i % 3]}, ${['#feca57', '#5f27cd', '#f368e0'][i % 3]})`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     margin: '0 auto var(--space-4)',
-                    color: 'var(--color-brand-600)',
+                    color: '#fff',
                   }}
                 >
                   {step.icon}
@@ -184,83 +321,136 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Landlord CTA */}
+      {/* Combined CTA Section */}
       <section
-        style={{
-          background: 'var(--color-brand-700)',
-          padding: 'var(--space-24) 0',
-          color: 'var(--color-neutral-0)',
-        }}
+        data-section="cta"
+        ref={(el) => (sectionRefs.current[1] = el)}
+        style={{ padding: 0 }}
       >
-        <div style={{ textAlign: 'center', padding: '0 var(--space-8)' }}>
-          <h2 style={{ color: 'var(--color-neutral-0)', marginBottom: 'var(--space-4)' }}>
-            Own a Property?
-          </h2>
-          <p
-            style={{
-              fontSize: 'var(--text-lg)',
-              color: 'var(--color-brand-100)',
-              maxWidth: '600px',
-              margin: '0 auto var(--space-8)',
-            }}
-          >
-            List your property on HomeLink and reach thousands of verified tenants.
-            We handle viewings, paperwork, and rent collection.
-          </p>
-          <Link
-            to="/auth/register/landlord"
-            className="btn btn-lg"
-            style={{
-              background: 'var(--color-neutral-0)',
-              color: 'var(--color-brand-700)',
-              textDecoration: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 'var(--space-2)',
-            }}
-          >
-            List Your Property <ArrowRight size={20} />
-          </Link>
+        {/* Desktop: split with angled divider */}
+        <div className="cta-split">
+          <div className="cta-split-left">
+            <h2>Own a Property?</h2>
+            <p>
+              List your property on HomeLink and reach thousands of verified tenants.
+              We handle viewings, paperwork, and rent collection.
+            </p>
+            <Link
+              to="/auth/register/landlord"
+              className="btn btn-lg"
+              style={{
+                background: '#fff',
+                color: '#764ba2',
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 'var(--space-2)',
+              }}
+            >
+              List Your Property <ArrowRight size={20} />
+            </Link>
+          </div>
+          <div className="cta-split-right">
+            <h2>Looking for a Rental?</h2>
+            <p>
+              Let our agents help you find the perfect home. Create a free account and tell us
+              what you're looking for — we'll do the rest.
+            </p>
+            <Link
+              to="/auth/register/tenant"
+              className="btn btn-lg"
+              style={{
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 'var(--space-2)',
+                background: '#fff',
+                color: '#f5576c',
+              }}
+            >
+              Get Started Free <ArrowRight size={20} />
+            </Link>
+          </div>
         </div>
-      </section>
 
-      {/* Tenant CTA */}
-      <section style={{ padding: 'var(--space-24) 0' }}>
-        <div style={{ textAlign: 'center', padding: '0 var(--space-8)' }}>
-          <h2 style={{ marginBottom: 'var(--space-4)' }}>Looking for a Rental?</h2>
-          <p
+        {/* Mobile: stacked */}
+        <div className="cta-mobile">
+          <div
+            className="animate-on-scroll"
             style={{
-              fontSize: 'var(--text-lg)',
-              color: 'var(--color-neutral-600)',
-              maxWidth: '600px',
-              margin: '0 auto var(--space-8)',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              padding: 'var(--space-16) 0',
+              color: '#fff',
+              textAlign: 'center',
             }}
           >
-            Let our agents help you find the perfect home. Create a free account and tell us
-            what you're looking for — we'll do the rest.
-          </p>
-          <Link
-            to="/auth/register/tenant"
-            className="btn btn-primary btn-lg"
-            style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)' }}
+            <div style={{ padding: '0 var(--space-8)' }}>
+              <h2 style={{ color: '#fff', marginBottom: 'var(--space-4)' }}>Own a Property?</h2>
+              <p style={{ fontSize: 'var(--text-lg)', color: 'rgba(255,255,255,0.9)', maxWidth: '600px', margin: '0 auto var(--space-8)' }}>
+                List your property on HomeLink and reach thousands of verified tenants.
+                We handle viewings, paperwork, and rent collection.
+              </p>
+              <Link
+                to="/auth/register/landlord"
+                className="btn btn-lg"
+                style={{ background: '#fff', color: '#764ba2', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)' }}
+              >
+                List Your Property <ArrowRight size={20} />
+              </Link>
+            </div>
+          </div>
+          <div
+            className="animate-on-scroll"
+            style={{
+              background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+              padding: 'var(--space-16) 0',
+              color: '#fff',
+              textAlign: 'center',
+            }}
           >
-            Get Started Free <ArrowRight size={20} />
-          </Link>
+            <div style={{ padding: '0 var(--space-8)' }}>
+              <h2 style={{ color: '#fff', marginBottom: 'var(--space-4)' }}>Looking for a Rental?</h2>
+              <p style={{ fontSize: 'var(--text-lg)', color: 'rgba(255,255,255,0.9)', maxWidth: '600px', margin: '0 auto var(--space-8)' }}>
+                Let our agents help you find the perfect home. Create a free account and tell us
+                what you're looking for — we'll do the rest.
+              </p>
+              <Link
+                to="/auth/register/tenant"
+                className="btn btn-lg"
+                style={{ background: '#fff', color: '#f5576c', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)' }}
+              >
+                Get Started Free <ArrowRight size={20} />
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Services Section */}
-      <section style={{ padding: 'var(--space-24) 0', background: 'var(--color-neutral-50)' }}>
+      <section
+        data-section="services"
+        ref={(el) => (sectionRefs.current[3] = el)}
+        style={{
+          padding: 'var(--space-24) 0',
+          background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 50%, #d299c2 100%)',
+        }}
+      >
         <div style={{ padding: '0 var(--space-8)' }}>
-          <h2 style={{ textAlign: 'center', marginBottom: 'var(--space-4)' }}>
+          <h2
+            className={`animate-on-scroll ${sectionVisible('services') ? 'is-visible' : ''}`}
+            style={{ textAlign: 'center', marginBottom: 'var(--space-4)', ['--anim-name']: 'homeFadeUp' }}
+          >
             Home Maintenance Services
           </h2>
           <p
+            className={`animate-on-scroll ${sectionVisible('services') ? 'is-visible' : ''}`}
             style={{
               textAlign: 'center',
               color: 'var(--color-neutral-600)',
               maxWidth: '600px',
               margin: '0 auto var(--space-12)',
+              animationDelay: animDelay(1),
+              ['--anim-name']: 'homeFadeUp',
             }}
           >
             Keep your home in top shape with our trusted maintenance services.
@@ -272,28 +462,64 @@ export default function HomePage() {
               gap: 'var(--space-6)',
             }}
           >
-            {['PABX Systems', 'CCTV Installation', 'TV Servicing', 'AC Repair', 'Refrigerator Repair'].map((service) => (
-              <div
-                key={service}
-                className="card"
-                style={{
-                  padding: 'var(--space-6)',
-                  textAlign: 'center',
-                  textDecoration: 'none',
-                  color: 'inherit',
-                  transition: 'transform var(--transition-fast)',
-                  cursor: 'pointer',
-                }}
-              >
-                <Wrench
-                  size={24}
-                  style={{ margin: '0 auto var(--space-3)', color: 'var(--color-brand-600)' }}
-                />
-                <h4 style={{ margin: 0 }}>{service}</h4>
-              </div>
-            ))}
+            {services.map((service, i) => {
+              const colors = [
+                ['#ff6b6b', '#feca57'],
+                ['#48dbfb', '#5f27cd'],
+                ['#ff9ff3', '#f368e0'],
+                ['#00d2d3', '#54a0ff'],
+                ['#ff6348', '#ff4757'],
+              ]
+              const [c1, c2] = colors[i % colors.length]
+              return (
+                <div
+                  key={service}
+                  className={`card animate-on-scroll ${sectionVisible('services') ? 'is-visible' : ''}`}
+                  style={{
+                    padding: 'var(--space-6)',
+                    textAlign: 'center',
+                    textDecoration: 'none',
+                    color: 'inherit',
+                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                    cursor: 'pointer',
+                    animationDelay: animDelay(i + 2),
+                    ['--anim-name']: ANIMATION_STYLES[i % ANIMATION_STYLES.length].keyframes,
+                    background: `linear-gradient(135deg, ${c1}15, ${c2}15)`,
+                    border: `1px solid ${c1}30`,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-6px) scale(1.02)'
+                    e.currentTarget.style.boxShadow = `0 12px 24px ${c1}30`
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = ''
+                    e.currentTarget.style.boxShadow = ''
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '3rem',
+                      height: '3rem',
+                      borderRadius: '50%',
+                      background: `linear-gradient(135deg, ${c1}, ${c2})`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      margin: '0 auto var(--space-3)',
+                      color: '#fff',
+                    }}
+                  >
+                    <Wrench size={18} />
+                  </div>
+                  <h4 style={{ margin: 0, fontWeight: 'var(--font-semibold)' }}>{service}</h4>
+                </div>
+              )
+            })}
           </div>
-          <div style={{ textAlign: 'center', marginTop: 'var(--space-8)' }}>
+          <div
+            className={`animate-on-scroll ${sectionVisible('services') ? 'is-visible' : ''}`}
+            style={{ textAlign: 'center', marginTop: 'var(--space-8)', animationDelay: animDelay(7), ['--anim-name']: 'homeFadeUp' }}
+          >
             <Link to="/maintenance-services" className="btn btn-outline" style={{ textDecoration: 'none' }}>
               View All Services
             </Link>
