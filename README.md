@@ -77,12 +77,13 @@ Frontend/src/
 - **React 19** with JavaScript (JSX) — no TypeScript
 - **Vite 8** — build tool and dev server
 - **React Router 7** — client-side routing with lazy-loaded routes
-- **TanStack Query 5** — server-state fetching, caching, invalidation
+- **TanStack Query 5** — server-state fetching, caching, invalidation (devtools stripped in prod)
 - **React Hook Form 7** + **Zod** — form handling and validation
 - **Axios** — HTTP client with JWT interceptors and token refresh
 - **Lucide React** — icon library
 - **Vitest 5** + **React Testing Library** — testing
 - **Custom CSS design system** — no external UI framework
+- **Homepage animations** — splash intro, scroll-triggered entrances, colorful gradients
 
 ## Prerequisites
 
@@ -283,6 +284,12 @@ currency/date formatting, and API error handling. Located in `Frontend/src/test/
   shadows, breakpoints). No external CSS framework.
 - **Accessibility:** Skip links, ARIA labels, focus-visible outlines, semantic HTML,
   `prefers-reduced-motion` support.
+- **Homepage:** Animated splash intro, scroll-triggered section entrances, colorful gradient
+  backgrounds, angled split CTA section (desktop), stacked CTAs (mobile).
+- **Service requests:** Split date/time fields with 2-hour minimum constraint, AM/PM display,
+  dynamic time-slot filtering, past-8PM auto-shift to tomorrow.
+- **Property cards:** Shared `PropertyCard` component with ownership-based badge visibility.
+- **Responsive navigation:** Dark sidebar with `end`-prop NavLink matching, mobile overlay.
 
 ## Notes
 
